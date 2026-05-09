@@ -379,49 +379,73 @@ export default function PRFPortal() {
 
       <audio ref={audioRef} loop src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0ca7a1176.mp3" />
 
-      <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/90 border-b border-yellow-500/30 shadow-2xl">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between gap-4">
-            <motion.div className="flex items-center gap-3 cursor-pointer" onClick={() => handlePageChange("inicio")} whileHover={{ scale: 1.05 }}>
-              <div className="w-14 h-14 bg-gradient-to-br from-yellow-400 via-orange-400 to-red-500 rounded-2xl shadow-xl border-4 border-white/20" />
-              <div>
-                <h1 className="text-2xl font-black tracking-widest bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent drop-shadow-lg">
-                  PRF PORTAL
-                </h1>
-                <div className="text-xs font-mono text-yellow-300 tracking-widest">OPERACIONAL RP v3</div>
-              </div>
-            </motion.div>
+```tsx
+<header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/90 border-b border-yellow-500/30 shadow-2xl">
+  <div className="max-w-7xl mx-auto px-3 py-1">
+    <div className="flex items-center justify-between gap-2">
+      <motion.div
+        className="flex items-center gap-2 cursor-pointer"
+        onClick={() => handlePageChange("inicio")}
+        whileHover={{ scale: 1.03 }}
+      >
+        <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 via-orange-400 to-red-500 rounded-lg shadow-lg border border-white/20" />
 
-            <div className="hidden md:flex items-center gap-2">
-              <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="px-3 py-2 text-xs rounded-full border border-white/20 hover:bg-white/10">
-                TEMA
-              </button>
-              <button onClick={() => setIsVideoPlaying(!isVideoPlaying)} className="px-3 py-2 text-xs rounded-full border border-white/20 hover:bg-white/10">
-                {isVideoPlaying ? "PAUSAR FUNDO" : "ATIVAR FUNDO"}
-              </button>
-              <button onClick={() => setUserLogged(!userLogged)} className="px-3 py-2 text-xs rounded-full border border-white/20 hover:bg-white/10">
-                {userLogged ? "LOGADO" : "ENTRAR"}
-              </button>
-            </div>
-          </div>
+        <div>
+          <h1 className="text-sm md:text-lg font-black tracking-wide bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
+            PRF PORTAL
+          </h1>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            {pages.map((p) => (
-              <button
-                key={p}
-                onClick={() => handlePageChange(p)}
-                className={`px-3 py-2 text-xs font-semibold rounded-full transition-all border ${
-                  page === p ? "bg-yellow-500 text-black border-yellow-300 shadow-lg" : "bg-white/5 border-white/10 hover:bg-yellow-500/20 hover:border-yellow-400"
-                }`}
-              >
-                {p.toUpperCase()}
-              </button>
-            ))}
+          <div className="text-[8px] font-mono text-yellow-300 tracking-widest">
+            OPERACIONAL RP
           </div>
         </div>
-      </header>
+      </motion.div>
 
-      <main className="pt-44 pb-16 max-w-7xl mx-auto px-4 lg:px-8 relative z-10">
+      <div className="hidden md:flex items-center gap-1">
+        <button
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          className="px-2 py-[3px] text-[9px] rounded-full border border-white/20 hover:bg-white/10"
+        >
+          TEMA
+        </button>
+
+        <button
+          onClick={() => setIsVideoPlaying(!isVideoPlaying)}
+          className="px-2 py-[3px] text-[9px] rounded-full border border-white/20 hover:bg-white/10"
+        >
+          {isVideoPlaying ? "FUNDO OFF" : "FUNDO ON"}
+        </button>
+
+        <button
+          onClick={() => setUserLogged(!userLogged)}
+          className="px-2 py-[3px] text-[9px] rounded-full border border-white/20 hover:bg-white/10"
+        >
+          {userLogged ? "ON" : "LOGIN"}
+        </button>
+      </div>
+    </div>
+
+    <div className="mt-1 flex flex-wrap gap-1">
+      {pages.map((p) => (
+        <button
+          key={p}
+          onClick={() => handlePageChange(p)}
+          className={`px-2 py-[3px] text-[9px] font-semibold rounded-full transition-all border ${
+            page === p
+              ? "bg-yellow-500 text-black border-yellow-300 shadow-lg"
+              : "bg-white/5 border-white/10 hover:bg-yellow-500/20 hover:border-yellow-400"
+          }`}
+        >
+          {p.toUpperCase()}
+        </button>
+      ))}
+    </div>
+  </div>
+</header>
+
+<main className="pt-24 pb-16 max-w-7xl mx-auto px-4 lg:px-8 relative z-10">
+
+
         <AnimatePresence mode="wait">
           <motion.section
             key={page}
