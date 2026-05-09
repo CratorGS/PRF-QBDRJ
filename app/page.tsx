@@ -3,9 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-/* ========================================
-   PÁGINAS
-======================================== */
 const pages = [
   "inicio",
   "dashboard",
@@ -13,6 +10,7 @@ const pages = [
   "doutrina",
   "hierarquia",
   "codigos",
+  "miranda",
   "operacoes",
   "treinamento",
   "equipamentos",
@@ -25,6 +23,7 @@ const pages = [
   "radio",
   "chat",
   "discord",
+  "servidores",
   "recrutamento",
   "noticias",
   "galeria",
@@ -32,97 +31,298 @@ const pages = [
   "creditos",
   "simulador",
   "rankings",
+  "ocorrencias",
+  "cursos",
+  "frota",
+  "setores",
+  "boletim",
+  "agenda",
+  "patrulha",
 ];
 
-/* ========================================
-   DADOS
-======================================== */
-
-// História oficial
 const historia = [
-  { ano: 1928, evento: "Fundação", desc: "Criada em 24/07/1928 por Washington Luís como 'Polícia de Estradas'." },
+  { ano: 1928, evento: "Fundação", desc: "Criada em 24/07/1928 como Polícia de Estradas." },
   { ano: 1945, evento: "PRF Federal", desc: "Oficialmente Polícia Rodoviária Federal." },
-  { ano: 1988, evento: "CF/88", desc: "Órgão de segurança pública com patrulhamento ostensivo." },
-  { ano: 1991, evento: "MJ", desc: "Departamento no Ministério da Justiça." },
-  { ano: 2003, evento: "Lei 10.711", desc: "Regulamentação moderna das atividades." },
-  { ano: 2019, evento: "SNT", desc: "Sistema Nacional de Trânsito reforçado." },
-  { ano: 2026, evento: "97 Anos", desc: "Rumo ao centenário com tecnologia avançada." },
+  { ano: 1988, evento: "CF/88", desc: "Consolidada como órgão de segurança pública." },
+  { ano: 1991, evento: "MJ", desc: "Estrutura fortalecida no Ministério da Justiça." },
+  { ano: 2026, evento: "Presente", desc: "Base moderna para RP, operações e patrulhamento." },
 ];
 
-// Hierarquia RGB
+const timeline = [
+  { ano: "1928", titulo: "Origem", desc: "Nascimento da estrutura de fiscalização rodoviária federal." },
+  { ano: "1945", titulo: "Nome consolidado", desc: "A corporação passa a ser reconhecida como PRF." },
+  { ano: "1988", titulo: "Segurança pública", desc: "A PRF ganha relevância institucional nacional." },
+  { ano: "2026", titulo: "Portal RP", desc: "Portal focado em FiveM/GTA RP com estética operacional." },
+];
+
+const doutrina = [
+  "Disciplina acima de tudo",
+  "Hierarquia obrigatória",
+  "Comunicação objetiva",
+  "Uso progressivo da força",
+  "Proteção da vida em primeiro lugar",
+  "Operação em equipe",
+  "Respeito absoluto ao comando",
+  "Controle emocional em ação",
+  "Eficiência operacional contínua",
+  "Segurança da população antes de qualquer operação",
+];
+
 const hierarchy = [
-  { level: "ALTO COMANDO", baseColor: "255,0,0", ranks: ["Diretor Geral PRF", "Comandante-Geral", "Subcomandante-Geral"] },
-  { level: "COMANDO REGIONAL", baseColor: "255,165,0", ranks: ["Cmd Regional", "Chefe Operações", "Coordenador Estratégico"] },
-  { level: "COMANDO TÁTICO", baseColor: "255,255,0", ranks: ["Cmd Unidade", "Supervisor", "Líder Tático"] },
-  { level: "OFICIAIS", baseColor: "0,191,255", ranks: ["Inspetor Chefe", "Inspetor", "Agente Especial"] },
-  { level: "OPERACIONAIS", baseColor: "0,255,0", ranks: ["Agente 1ª Classe", "Agente 2ª Classe", "Agente", "Recruta"] },
+  { level: "ALTO COMANDO", baseColor: "255,0,0", border: "border-red-500/40", ranks: ["Diretor Geral", "Comandante-Geral", "Subcomandante-Geral"] },
+  { level: "COMANDO REGIONAL", baseColor: "255,165,0", border: "border-orange-500/40", ranks: ["Comandante Regional", "Chefe de Operações", "Coordenador Estratégico"] },
+  { level: "COMANDO TÁTICO", baseColor: "255,255,0", border: "border-yellow-500/40", ranks: ["Comandante de Unidade", "Supervisor Operacional", "Líder Tático"] },
+  { level: "OFICIAIS", baseColor: "0,191,255", border: "border-sky-500/40", ranks: ["Inspetor Chefe", "Inspetor", "Agente Especial"] },
+  { level: "OPERACIONAIS", baseColor: "0,255,0", border: "border-emerald-500/40", ranks: ["Agente 1ª Classe", "Agente 2ª Classe", "Agente Operacional", "Recruta"] },
 ];
 
-// Códigos rádio
+const operacoes = [
+  "Patrulhamento Rodoviário",
+  "Bloqueios Táticos",
+  "Abordagem Veicular",
+  "Fiscalização de Cargas",
+  "Combate ao Tráfico",
+  "Operações Integradas",
+  "Resgate em Acidentes",
+  "Apoio Estadual",
+  "Inteligência de Trânsito",
+  "Ponto de Controle",
+  "Escala de Serviço",
+  "Apoio em Grandes Eventos",
+  "Cerco e Bloqueio",
+  "Escolta Operacional",
+  "Controle de Fluxo",
+];
+
 const codigos = [
-  { c: "QAP", d: "Na escuta - pronto para receber." },
-  { c: "QTH", d: "Localização atual." },
-  { c: "QRR", d: "Reforço solicitado." },
+  { c: "QAP", d: "Na escuta, pronto para receber." },
+  { c: "QRA", d: "Nome ou identificação da estação/operador." },
+  { c: "QRB", d: "Distância aproximada entre estações." },
+  { c: "QRC", d: "Quem é responsável pela estação." },
+  { c: "QRD", d: "Para onde vai e de onde vem." },
+  { c: "QRE", d: "Destino e rota." },
+  { c: "QRF", d: "Voltar ao local de origem." },
+  { c: "QRG", d: "Frequência atual." },
+  { c: "QRH", d: "Frequência varia." },
+  { c: "QRI", d: "Tom ou intensidade do sinal." },
+  { c: "QRJ", d: "Recepção fraca ou difícil." },
+  { c: "QRK", d: "Qualidade do sinal recebido." },
+  { c: "QRL", d: "Estou ocupado." },
+  { c: "QRM", d: "Interferência atmosférica ou de outra estação." },
+  { c: "QRN", d: "Ruído estático." },
+  { c: "QRO", d: "Aumentar potência." },
+  { c: "QRP", d: "Diminuir potência." },
+  { c: "QRQ", d: "Transmitir mais rápido." },
+  { c: "QRR", d: "Socorro ou reforço solicitado." },
+  { c: "QRS", d: "Transmitir mais devagar." },
+  { c: "QRT", d: "Parar de transmitir." },
+  { c: "QRU", d: "Não tenho nada para você." },
+  { c: "QRV", d: "Pronto para operar." },
   { c: "QRX", d: "Aguardar instruções." },
-  { c: "QSL", d: "Mensagem confirmada." },
+  { c: "QRY", d: "Sua vez de transmitir." },
+  { c: "QRZ", d: "Quem está chamando?" },
+  { c: "QSA", d: "Força do sinal." },
+  { c: "QSB", d: "Sinal oscilando." },
+  { c: "QSL", d: "Mensagem recebida e confirmada." },
+  { c: "QSM", d: "Repita a última mensagem." },
+  { c: "QSO", d: "Contato direto entre estações." },
+  { c: "QSP", d: "Transmitir mensagem para outra estação." },
+  { c: "QSY", d: "Mudar de frequência." },
+  { c: "QTH", d: "Localização atual." },
   { c: "10-4", d: "Entendido." },
+  { c: "10-6", d: "Ocupado." },
+  { c: "10-7", d: "Fora de serviço." },
+  { c: "10-8", d: "Disponível / em serviço." },
+  { c: "10-9", d: "Repita a mensagem." },
+  { c: "10-18", d: "Urgente." },
+  { c: "10-19", d: "Retornando à base." },
   { c: "10-20", d: "Minha posição." },
-  { c: "Código 5", d: "Operação ativa." },
+  { c: "10-23", d: "Cheguei ao local." },
+  { c: "10-33", d: "Emergência máxima." },
+  { c: "10-50", d: "Acidente." },
+  { c: "10-80", d: "Perseguição em andamento." },
+  { c: "Código 1", d: "Ocorrência leve / rotina." },
+  { c: "Código 2", d: "Resposta rápida sem sirene." },
+  { c: "Código 3", d: "Resposta com urgência." },
+  { c: "Código 4", d: "Sem necessidade de apoio." },
+  { c: "Código 5", d: "Operação em andamento." },
+  { c: "Código 6", d: "Investigação no local." },
   { c: "Código 7", d: "Abordagem veicular." },
+  { c: "Código 8", d: "Apoio solicitado." },
+  { c: "Código 9", d: "Bloqueio / cerco." },
+  { c: "Código 10", d: "Situação sob controle." },
+  { c: "Código 11", d: "Equipe em patrulha." },
+  { c: "Código 12", d: "Retorno ao serviço." },
+  { c: "Código 13", d: "Atenção máxima." },
+  { c: "Código 14", d: "Atendimento médico necessário." },
+  { c: "Código 15", d: "Encaminhamento à base." },
+  { c: "Código 16", d: "Verificação documental." },
+  { c: "Código 17", d: "Suspeito em fuga." },
+  { c: "Código 18", d: "Apoio aéreo / reforço especial." },
   { c: "Código 19", d: "Acidente com vítimas." },
+  { c: "Código 20", d: "Ocorrência encerrada." },
+  { c: "Código 21", d: "Contato com central." },
+  { c: "Código 22", d: "Perímetro montado." },
+  { c: "Código 23", d: "Checagem de local." },
+  { c: "Código 24", d: "Retorno de patrulha." },
+  { c: "Código 25", d: "Apreensão realizada." },
+  { c: "Código 26", d: "Material recolhido." },
+  { c: "Código 27", d: "Condução de indivíduo." },
+  { c: "Código 28", d: "Documento verificado." },
+  { c: "Código 29", d: "Apoio ao comando." },
+  { c: "Código 30", d: "Fim de operação." },
 ];
 
-// Viaturas
-const viaturas = [
-  { modelo: "Dodge Journey PRF", ano: 2026, uso: "Patrulhamento", cor: "Branco/Amarelo PRF" },
-  { modelo: "Ford Ranger Tática", ano: 2025, uso: "Rural/Fronteira", cor: "Preto Militar" },
-  { modelo: "VW Tiguan Comando", ano: 2024, uso: "Comando Regional", cor: "Branco PRF" },
-  { modelo: "Toyota Hilux 4x4", ano: 2026, uso: "Operações Especiais", cor: "Verde Oliva" },
+const miranda = [
+  "Você tem o direito de permanecer em silêncio.",
+  "Qualquer coisa que disser poderá e será usada contra você.",
+  "Você tem o direito de falar com um advogado antes e durante o interrogatório.",
+  "Se não puder pagar um advogado, um será nomeado para você.",
+  "Você pode encerrar o interrogatório a qualquer momento.",
+  "Você entendeu os seus direitos?",
 ];
 
-// Armas
-const armas = [
-  { nome: "Pistola Taurus PT940", calibre: ".40 S&W", uso: "Individual", cap: "15+1" },
-  { nome: "Fuzil IA2 5.56", calibre: "5.56x45", uso: "Tático", cap: "30" },
-  { nome: "Escopeta Benelli M4", calibre: "12GA", uso: "Breaching", cap: "7+1" },
+const servidoresDiscord = [
+  { nome: "DA PRF", link: "https://discord.gg/H6kdsd5yRu" },
+  { nome: "DA CIDADE", link: "https://discord.gg/XjBF8qrvJw" },
 ];
 
-// Equipamentos
+const boletins = [
+  { titulo: "Ocorrência 01", desc: "Fiscalização em BR com apoio da guarnição." },
+  { titulo: "Ocorrência 02", desc: "Bloqueio tático com suspeita de fuga." },
+  { titulo: "Ocorrência 03", desc: "Apoio em acidente e controle da área." },
+  { titulo: "Ocorrência 04", desc: "Apreensão e condução à delegacia RP." },
+  { titulo: "Ocorrência 05", desc: "Operação integrada em rodovia federal." },
+];
+
+const treinamento = [
+  { nome: "Patrulhamento", detalhe: "Leitura de via, postura e fiscalização contínua." },
+  { nome: "Abordagem Veicular", detalhe: "Aproximação segura, verbalização e controle." },
+  { nome: "Bloqueios Táticos", detalhe: "Posicionamento de viaturas, cones e contenção." },
+  { nome: "Comunicação", detalhe: "Rádio, clareza de comando e coordenação." },
+  { nome: "Tático", detalhe: "Resposta a cenários de risco e reação em equipe." },
+  { nome: "Resgate", detalhe: "Proteção da cena e suporte inicial." },
+  { nome: "Fiscalização", detalhe: "Documentação, inspeção e irregularidades." },
+  { nome: "Disciplina", detalhe: "Postura, hierarquia e rotina operacional." },
+];
+
 const equipamentos = [
-  { nome: "Radar Multa Fixa", tipo: "Fiscalização" },
-  { nome: "Etanolímetro Dräger", tipo: "Alcoolemia" },
-  { nome: "Colete Balístico IIIA", tipo: "Proteção" },
-  { nome: "Giroflex LED", tipo: "Sinalização" },
+  { nome: "Radar", tipo: "Fiscalização" },
+  { nome: "Etanolímetro", tipo: "Alcoolemia" },
+  { nome: "Colete Balístico", tipo: "Proteção" },
+  { nome: "Giroflex", tipo: "Sinalização" },
+  { nome: "Rádio", tipo: "Comunicação" },
+  { nome: "Câmera", tipo: "Registro" },
+  { nome: "Tablet", tipo: "Registro" },
+  { nome: "Lanterna Tática", tipo: "Proteção" },
 ];
 
-// Estatísticas
-const stats = [
-  { label: "Km Patroliados", value: "2.500.000", color: "yellow", unidade: "km" },
-  { label: "Abordagens", value: "1.200.000", color: "green", unidade: "" },
-  { label: "Multas", value: "850.000", color: "orange", unidade: "" },
-  { label: "Prisões", value: "12.000", color: "red", unidade: "" },
-  { label: "Resgates", value: "45.000", color: "blue", unidade: "" },
+const viaturas = [
+  { nome: "SUV PRF", uso: "Patrulhamento", status: "Ativa" },
+  { nome: "Pickup Tática", uso: "Fronteira e apoio", status: "Disponível" },
+  { nome: "Comando Regional", uso: "Coordenação", status: "Em uso" },
+  { nome: "4x4 Operacional", uso: "Operações especiais", status: "Disponível" },
+  { nome: "Móvel de Controle", uso: "Base", status: "Ativa" },
+  { nome: "Resgate Rodoviário", uso: "Socorro", status: "Ativa" },
 ];
 
-// Recrutamento
-const recrutamento = [
-  "CNH Categoria B • Ensino Médio Completo",
-  "Prova Objetiva → TAF → Curso Formação",
-  "Salário: R$ 10.790,87 + Periculosidade",
-  "Vagas 2026: 1.500 Aprovados",
-  "Inscrições: concursosprf.gov.br",
+const frota = [
+  { modelo: "SUV PRF", setor: "Rodovia", ativo: "Sim" },
+  { modelo: "Pickup Tática", setor: "Fronteira", ativo: "Sim" },
+  { modelo: "Comando Regional", setor: "Comando", ativo: "Não" },
+  { modelo: "4x4 Operacional", setor: "Apoio", ativo: "Sim" },
+  { modelo: "Móvel de Controle", setor: "Base", ativo: "Sim" },
+  { modelo: "Resgate Rodoviário", setor: "Socorro", ativo: "Sim" },
 ];
 
-// Notícias
-const noticias = [
-  { titulo: "PRF apreende 2t cocaína BR-101", data: "09/05/2026" },
-  { titulo: "Operação integrada resgata reféns", data: "08/05/2026" },
-  { titulo: "Novo radar em operação nacional", data: "07/05/2026" },
+const armas = [
+  { nome: "Pistola .40", calibre: ".40", uso: "Individual", cap: "15+1" },
+  { nome: "Fuzil 5.56", calibre: "5.56", uso: "Tático", cap: "30" },
+  { nome: "Escopeta 12GA", calibre: "12GA", uso: "Breaching", cap: "8" },
 ];
 
-/* ========================================
-   COMPONENTE
-======================================== */
+const manualOperacional = [
+  "Manter postura disciplinada em toda comunicação.",
+  "Utilizar rádio apenas com mensagens objetivas.",
+  "Não romper a hierarquia durante a operação.",
+  "Priorizar segurança da equipe e da população.",
+  "Executar ações com cautela, precisão e integração.",
+  "Registrar ocorrências com clareza após o atendimento.",
+  "Seguir o comando da unidade em toda ação.",
+  "Respeitar a escala e o plantão em serviço.",
+  "Preservar prova e local da ocorrência.",
+  "Manter padrão RP coerente e organizado.",
+];
+
+const setores = [
+  { nome: "Patrulhamento", desc: "Foco em presença constante e prevenção." },
+  { nome: "Tático", desc: "Resposta a cenários de risco e apoio especializado." },
+  { nome: "Operacional", desc: "Execução direta das ordens e manutenção da ordem." },
+  { nome: "Inteligência", desc: "Leitura de rotas e movimentações suspeitas." },
+  { nome: "Comunicação", desc: "Rádio, coordenação e repasse de informações." },
+  { nome: "Resgate", desc: "Atendimento a acidentes e suporte inicial." },
+  { nome: "Fiscalização", desc: "Checagem documental, cargas e irregularidades." },
+  { nome: "Comando", desc: "Gestão, liderança e organização da corporação." },
+];
+
+const ocorrencias = [
+  { tipo: "Fiscalização", detalhe: "Abordagem de rotina em rodovia federal com checagem documental e verificação veicular." },
+  { tipo: "Operação Tática", detalhe: "Ação integrada com equipe posicionada para bloqueio e contenção de fuga." },
+  { tipo: "Resgate", detalhe: "Atendimento a acidente com apoio médico e proteção da cena." },
+  { tipo: "Combate ao Crime", detalhe: "Intervenção em transporte irregular, tráfico ou circulação suspeita." },
+  { tipo: "Apoio Externo", detalhe: "Atuação conjunta com outras forças de segurança em ocorrência complexa." },
+  { tipo: "Ocorrência Administrativa", detalhe: "Registro, relatório e atualização de prontuário da unidade." },
+  { tipo: "Perseguição", detalhe: "Acompanhamento de suspeito em fuga com apoio tático." },
+  { tipo: "Cerco e Bloqueio", detalhe: "Interdição operacional de rota para contenção." },
+];
+
+const cursos = [
+  { nome: "Curso de Patrulhamento", desc: "Postura, leitura de via e presença operacional." },
+  { nome: "Curso de Abordagem", desc: "Aproximação, verbalização e controle da situação." },
+  { nome: "Curso de Rádio", desc: "Códigos, clareza e precisão operacional." },
+  { nome: "Curso Tático", desc: "Cenários de risco e ação coordenada." },
+  { nome: "Curso de Resgate", desc: "Proteção da cena e apoio inicial." },
+  { nome: "Curso de Fiscalização", desc: "Rotina, documentação e análise de irregularidades." },
+  { nome: "Curso de Condução", desc: "Prontidão, escolta e deslocamento operacional." },
+  { nome: "Curso de Liderança", desc: "Comando, tomada de decisão e visão de unidade." },
+];
+
+const ranking = [
+  { nome: "Agente Destaque", pontos: "980" },
+  { nome: "Patrulheiro Elite", pontos: "920" },
+  { nome: "Operador Tático", pontos: "870" },
+  { nome: "Recruta Promissor", pontos: "740" },
+  { nome: "Comando Ativo", pontos: "700" },
+  { nome: "Apoiador da Unidade", pontos: "650" },
+  { nome: "Fiscal Operacional", pontos: "610" },
+  { nome: "Comunicação Ativa", pontos: "590" },
+];
+
+const agenda = [
+  { dia: "Segunda", evento: "Briefing e patrulha" },
+  { dia: "Terça", evento: "Treino de abordagem" },
+  { dia: "Quarta", evento: "Operação integrada" },
+  { dia: "Quinta", evento: "Fiscalização avançada" },
+  { dia: "Sexta", evento: "Rádio e comunicação" },
+  { dia: "Sábado", evento: "Evento RP/plantão" },
+  { dia: "Domingo", evento: "Manutenção e relatório" },
+];
+
+const patrulha = [
+  { posto: "BR-101", status: "Ativo", equipe: "3 viaturas" },
+  { posto: "BR-116", status: "Ativo", equipe: "2 viaturas" },
+  { posto: "BR-040", status: "Em apoio", equipe: "1 viatura" },
+  { posto: "Fronteira", status: "Operação", equipe: "4 agentes" },
+  { posto: "Base Central", status: "Ativa", equipe: "Comando" },
+];
+
+const creditos = [
+  "Portal desenvolvido para PRF do FiveM / GTA RP.",
+  "Layout operacional com foco em imersão.",
+  "Painéis, histórico, rádio, frota e recrutamento.",
+  "Interface moderna com tema escuro e RGB.",
+  "Seção de códigos, Miranda e servidores Discord.",
+];
 
 export default function PRFPortal() {
   const [page, setPage] = useState("inicio");
@@ -130,6 +330,7 @@ export default function PRFPortal() {
   const [userLogged, setUserLogged] = useState(false);
   const [chatMessages, setChatMessages] = useState<string[]>(["Central: Todas unidades QAP?"]);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [theme, setTheme] = useState("dark");
   const chatRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -163,7 +364,7 @@ export default function PRFPortal() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-indigo-900/50 text-white overflow-hidden relative antialiased">
+    <div className={`min-h-screen ${theme === "dark" ? "bg-gradient-to-br from-gray-950 via-black to-indigo-950" : "bg-slate-950"} text-white overflow-hidden relative antialiased`}>
       <div className="fixed inset-0 z-0 opacity-30 pointer-events-none">
         {isVideoPlaying && (
           <iframe
@@ -176,82 +377,51 @@ export default function PRFPortal() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/95 to-transparent" />
       </div>
 
-      <audio
-        ref={audioRef}
-        loop
-        src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0ca7a1176.mp3"
-      />
+      <audio ref={audioRef} loop src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0ca7a1176.mp3" />
 
       <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/90 border-b border-yellow-500/30 shadow-2xl">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <motion.div
-              className="flex items-center gap-3 cursor-pointer"
-              onClick={() => handlePageChange("inicio")}
-              whileHover={{ scale: 1.05 }}
-            >
+          <div className="flex items-center justify-between gap-4">
+            <motion.div className="flex items-center gap-3 cursor-pointer" onClick={() => handlePageChange("inicio")} whileHover={{ scale: 1.05 }}>
               <div className="w-14 h-14 bg-gradient-to-br from-yellow-400 via-orange-400 to-red-500 rounded-2xl shadow-xl border-4 border-white/20" />
               <div>
                 <h1 className="text-2xl font-black tracking-widest bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent drop-shadow-lg">
                   PRF PORTAL
                 </h1>
-                <div className="text-xs font-mono text-yellow-300 tracking-widest">OPERACIONAL v2.6</div>
+                <div className="text-xs font-mono text-yellow-300 tracking-widest">OPERACIONAL RP v3</div>
               </div>
             </motion.div>
 
-            <div className="md:hidden flex gap-2">
-              {pages.slice(0, 6).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => handlePageChange(p)}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-full transition-all ${
-                    page === p ? "bg-yellow-500 text-black shadow-lg" : "hover:bg-yellow-500/30"
-                  }`}
-                >
-                  {p.slice(0, 3).toUpperCase()}
-                </button>
-              ))}
+            <div className="hidden md:flex items-center gap-2">
+              <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="px-3 py-2 text-xs rounded-full border border-white/20 hover:bg-white/10">
+                TEMA
+              </button>
+              <button onClick={() => setIsVideoPlaying(!isVideoPlaying)} className="px-3 py-2 text-xs rounded-full border border-white/20 hover:bg-white/10">
+                {isVideoPlaying ? "PAUSAR FUNDO" : "ATIVAR FUNDO"}
+              </button>
+              <button onClick={() => setUserLogged(!userLogged)} className="px-3 py-2 text-xs rounded-full border border-white/20 hover:bg-white/10">
+                {userLogged ? "LOGADO" : "ENTRAR"}
+              </button>
             </div>
+          </div>
 
-            <div className="hidden md:flex items-center gap-3">
-              <div className="flex bg-black/60 backdrop-blur-sm px-4 py-2 rounded-full border border-yellow-500/40">
-                {["inicio", "hierarquia", "equipamentos", "recrutamento", "dashboard"].map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => handlePageChange(p)}
-                    className={`px-4 py-2 text-sm font-semibold rounded-xl transition-all mx-1 ${
-                      page === p
-                        ? "bg-gradient-to-r from-yellow-500 to-orange-500 text-black shadow-lg scale-105"
-                        : "hover:bg-yellow-500/30 hover:scale-105"
-                    }`}
-                  >
-                    {p.toUpperCase()}
-                  </button>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-2 bg-black/70 px-3 py-2 rounded-full border border-white/20">
-                <button
-                  onClick={() => setIsVideoPlaying(!isVideoPlaying)}
-                  className="p-2 rounded-xl hover:bg-white/20 transition-all text-lg"
-                  title="Fundo vídeo"
-                >
-                  {isVideoPlaying ? "⏸️" : "▶️"}
-                </button>
-                <button
-                  onClick={() => setUserLogged(!userLogged)}
-                  className={`p-2 rounded-xl transition-all text-lg ${userLogged ? "hover:bg-green-500/20" : "hover:bg-yellow-500/20"}`}
-                  title="Login"
-                >
-                  {userLogged ? "✅" : "🔐"}
-                </button>
-              </div>
-            </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {pages.map((p) => (
+              <button
+                key={p}
+                onClick={() => handlePageChange(p)}
+                className={`px-3 py-2 text-xs font-semibold rounded-full transition-all border ${
+                  page === p ? "bg-yellow-500 text-black border-yellow-300 shadow-lg" : "bg-white/5 border-white/10 hover:bg-yellow-500/20 hover:border-yellow-400"
+                }`}
+              >
+                {p.toUpperCase()}
+              </button>
+            ))}
           </div>
         </div>
       </header>
 
-      <main className="pt-24 pb-16 max-w-7xl mx-auto px-4 lg:px-8 relative z-10">
+      <main className="pt-44 pb-16 max-w-7xl mx-auto px-4 lg:px-8 relative z-10">
         <AnimatePresence mode="wait">
           <motion.section
             key={page}
@@ -280,11 +450,11 @@ export default function PRFPortal() {
       <footer className="py-12 border-t-4 border-yellow-500/30 bg-black/95 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <div className="text-2xl font-black text-yellow-400 mb-4 tracking-wider">PRF PORTAL OPERACIONAL</div>
-          <div className="text-zinc-500 text-sm mb-6">Simulação RP • Baseada em dados oficiais PRF • 2026</div>
+          <div className="text-zinc-500 text-sm mb-6">Simulação RP • FiveM / GTA RP • 2026</div>
           <div className="flex flex-wrap justify-center gap-4 text-sm text-zinc-600">
-            <a href="#" className="hover:text-yellow-400 transition-colors">Termos</a>
-            <a href="#" className="hover:text-yellow-400 transition-colors">Privacidade</a>
-            <span>Feito com ❤️ para RP Brasil</span>
+            {creditos.map((c, i) => (
+              <span key={i}>{c}</span>
+            ))}
           </div>
         </div>
       </footer>
@@ -292,209 +462,133 @@ export default function PRFPortal() {
   );
 }
 
-/* ========================================
-   RENDER DAS PÁGINAS
-======================================== */
-
 function renderPageContent(page: string, props: any) {
   switch (page) {
     case "inicio":
       return renderInicio(props);
-    case "hierarquia":
-      return renderHierarquia(props);
     case "dashboard":
       return renderDashboard(props);
-    case "viaturas":
-      return renderViaturas();
-    case "equipamentos":
-      return renderEquipamentos();
-    case "recrutamento":
-      return renderRecrutamento();
-    case "chat":
-      return renderChat(props);
+    case "historia":
+      return renderHistoria();
+    case "doutrina":
+      return renderDoutrina();
+    case "hierarquia":
+      return renderHierarquia(props);
     case "codigos":
       return renderCodigos();
+    case "miranda":
+      return renderMiranda();
+    case "operacoes":
+      return renderOperacoes();
+    case "treinamento":
+      return renderTreinamento();
+    case "equipamentos":
+      return renderEquipamentos();
+    case "viaturas":
+      return renderViaturas();
+    case "armas":
+      return renderArmas();
+    case "uniformes":
+      return renderUniformes();
+    case "manual":
+      return renderManual();
+    case "estatisticas":
+      return renderEstatisticas();
+    case "timeline":
+      return renderTimeline();
     case "radio":
       return renderRadio();
+    case "chat":
+      return renderChat(props);
+    case "discord":
+      return renderDiscord();
+    case "servidores":
+      return renderServidoresDiscord();
+    case "recrutamento":
+      return renderRecrutamento();
     case "noticias":
       return renderNoticias();
+    case "galeria":
+      return renderGaleria();
+    case "config":
+      return renderConfig();
+    case "creditos":
+      return renderCreditos();
+    case "simulador":
+      return renderSimulador();
+    case "rankings":
+      return renderRankings();
+    case "ocorrencias":
+      return renderOcorrencias();
+    case "cursos":
+      return renderCursos();
+    case "frota":
+      return renderFrota();
+    case "setores":
+      return renderSetores();
+    case "boletim":
+      return renderBoletim();
+    case "agenda":
+      return renderAgenda();
+    case "patrulha":
+      return renderPatrulha();
     default:
-      return (
-        <div className="text-center py-32">
-          <div className="text-6xl mb-8 animate-bounce">🚔</div>
-          <h2 className="text-4xl font-black text-yellow-400 mb-6">EM DESENVOLVIMENTO</h2>
-          <p className="text-xl text-zinc-400 max-w-2xl mx-auto">
-            Esta seção está sendo desenvolvida. Portal com 25+ páginas em construção!
-          </p>
-        </div>
-      );
+      return <div className="text-center py-32 text-2xl">EM DESENVOLVIMENTO</div>;
   }
 }
 
 function renderInicio({ handlePageChange }: any) {
   return (
     <div className="space-y-16">
-      <motion.div className="text-center py-32" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
-        <div className="text-6xl lg:text-8xl font-black bg-gradient-to-r from-yellow-400 via-orange-400 to-red-500 bg-clip-text text-transparent mb-8 animate-pulse">
-          POLÍCIA RODOVIÁRIA FEDERAL
+      <motion.div className="text-center py-24" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+        <div className="text-5xl md:text-7xl lg:text-8xl font-black bg-gradient-to-r from-yellow-400 via-orange-400 to-red-500 bg-clip-text text-transparent mb-8">
+          PRF FIVEM
         </div>
-        <div className="text-2xl lg:text-3xl text-yellow-300 mb-12 max-w-4xl mx-auto leading-relaxed">
-          Portal Operacional Completo • Hierarquia • Equipamentos • Estatísticas • RP Brasil
+        <div className="text-xl md:text-3xl text-yellow-300 mb-10 max-w-5xl mx-auto leading-relaxed">
+          Portal Operacional Completo para PRF do GTA RP • Hierarquia • Frota • Rádio • Ocorrências • Treinamento • Miranda • Discord
         </div>
-        <div className="flex flex-wrap gap-6 justify-center">
-          <motion.button
-            className="px-16 py-6 bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-black text-2xl rounded-3xl shadow-2xl hover:shadow-3xl hover:scale-105 transition-all"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => handlePageChange("recrutamento")}
-          >
-            🚔 ENTRAR NO RP
+        <div className="flex flex-wrap gap-4 justify-center">
+          <motion.button className="px-8 py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-black text-xl rounded-2xl shadow-2xl" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} onClick={() => handlePageChange("dashboard")}>
+            ACESSAR PAINEL
           </motion.button>
-          <motion.button
-            className="px-16 py-6 border-4 border-yellow-400 text-yellow-400 font-black text-2xl rounded-3xl hover:bg-yellow-500/20 transition-all"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => handlePageChange("hierarquia")}
-          >
-            📋 MANUAL COMPLETO
+          <motion.button className="px-8 py-4 border-2 border-yellow-400 text-yellow-400 font-black text-xl rounded-2xl hover:bg-yellow-500/20 transition-all" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }} onClick={() => handlePageChange("manual")}>
+            VER MANUAL
           </motion.button>
         </div>
       </motion.div>
 
-      <motion.section
-        className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8"
-        initial={{ y: 50 }}
-        animate={{ y: 0 }}
-        transition={{ delay: 0.4 }}
-      >
-        {stats.map((stat, i) => (
-          <motion.div
-            key={i}
-            className="p-8 group bg-black/60 backdrop-blur-sm border border-white/20 rounded-3xl text-center hover:border-yellow-400/70 hover:bg-yellow-500/10 transition-all cursor-pointer"
-            whileHover={{ scale: 1.1, y: -10 }}
-            onClick={() => handlePageChange("estatisticas")}
-          >
-            <div className={`text-4xl font-black mb-3 ${getColorClass(stat.color)}`}>{stat.value}</div>
-            <div className="text-lg font-bold text-white/90 uppercase tracking-wide">{stat.label}</div>
-            <div className="text-xs text-zinc-500">{stat.unidade}</div>
-          </motion.div>
-        ))}
-      </motion.section>
-
-      <motion.section
-        className="grid md:grid-cols-3 lg:grid-cols-6 gap-6"
-        initial={{ scale: 0.9 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.6 }}
-      >
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { page: "doutrina", icon: "📜", label: "DOUTRINA" },
-          { page: "equipamentos", icon: "🛠️", label: "EQUIP." },
-          { page: "viaturas", icon: "🚔", label: "VIATURAS" },
-          { page: "recrutamento", icon: "🎯", label: "RP" },
-          { page: "noticias", icon: "📰", label: "NOTÍCIAS" },
-          { page: "chat", icon: "💬", label: "RÁDIO" },
-        ].map(({ page, icon, label }, i) => (
-          <motion.div
-            key={i}
-            className="p-10 bg-black/50 border border-yellow-500/30 rounded-3xl text-center group cursor-pointer hover:bg-yellow-500/20 hover:border-yellow-400/70 transition-all"
-            whileHover={{ scale: 1.1, y: -15 }}
-            onClick={() => handlePageChange(page)}
-          >
-            <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">{icon}</div>
-            <div className="font-bold text-xl uppercase tracking-wider group-hover:text-yellow-400 transition-colors">
-              {label}
-            </div>
+          { label: "UNIDADES ATIVAS", value: "08" },
+          { label: "PATRULHAS", value: "24" },
+          { label: "OCORRÊNCIAS", value: "17" },
+          { label: "AGENTES ON-LINE", value: "41" },
+        ].map((item, i) => (
+          <div key={i} className="p-6 bg-black/60 border border-yellow-500/30 rounded-3xl text-center">
+            <div className="text-4xl font-black text-yellow-400">{item.value}</div>
+            <div className="text-sm text-zinc-400 mt-2">{item.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-6">
+        {[
+          { page: "historia", label: "História", icon: "📜" },
+          { page: "hierarquia", label: "Hierarquia", icon: "🎖️" },
+          { page: "ocorrencias", label: "Ocorrências", icon: "🚨" },
+          { page: "frota", label: "Frota", icon: "🚔" },
+          { page: "cursos", label: "Cursos", icon: "🎓" },
+          { page: "recrutamento", label: "Recrutamento", icon: "🎯" },
+          { page: "miranda", label: "Miranda", icon: "⚖️" },
+          { page: "servidores", label: "Discord", icon: "💬" },
+          { page: "boletim", label: "Boletim", icon: "🗒️" },
+        ].map((item, i) => (
+          <motion.div key={i} className="p-8 bg-black/50 border border-yellow-500/30 rounded-3xl text-center cursor-pointer hover:bg-yellow-500/10" whileHover={{ y: -10, scale: 1.03 }} onClick={() => handlePageChange(item.page)}>
+            <div className="text-4xl mb-4">{item.icon}</div>
+            <div className="text-xl font-bold text-yellow-300">{item.label}</div>
           </motion.div>
         ))}
-      </motion.section>
-    </div>
-  );
-}
-
-function renderHierarquia({ getRgbColor }: any) {
-  return (
-    <div className="space-y-16 max-w-6xl mx-auto">
-      <motion.div className="text-center py-16" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        <h1 className="text-6xl lg:text-8xl font-black bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent mb-8">
-          HIERARQUIA PRF
-        </h1>
-        <div className="w-32 h-1 bg-gradient-to-r from-yellow-400 to-orange-500 mx-auto rounded-full" />
-      </motion.div>
-
-      {hierarchy.map((grupo, i) => (
-        <motion.section
-          key={i}
-          className="group"
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: i * 0.2 }}
-        >
-          <div className="text-center mb-12">
-            <h2 className="text-5xl font-black mb-4" style={{ color: getRgbColor(grupo.baseColor, 1.5) }}>
-              {grupo.level}
-            </h2>
-            <div
-              className="w-24 h-1 mx-auto rounded-full"
-              style={{ backgroundColor: getRgbColor(grupo.baseColor, 0.8) }}
-            />
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {grupo.ranks.map((rank, j) => (
-              <motion.div
-                key={j}
-                className="relative p-10 lg:p-12 border-2 border-white/20 rounded-3xl bg-black/70 backdrop-blur-xl cursor-pointer overflow-hidden group-hover:border-white/50 hover:shadow-2xl"
-                style={{
-                  background: `linear-gradient(135deg, rgba(0,0,0,0.9), ${getRgbColor(grupo.baseColor, 0.4)})`,
-                }}
-                whileHover={{
-                  scale: 1.08,
-                  rotateX: 8,
-                  rotateY: 8,
-                  boxShadow: `0 35px 70px ${getRgbColor(grupo.baseColor, 0.5)}`,
-                }}
-                animate={{
-                  backgroundColor: [
-                    `rgba(0,0,0,0.9)`,
-                    getRgbColor(grupo.baseColor, 0.6),
-                    `rgba(0,0,0,0.9)`,
-                  ],
-                }}
-                transition={{ duration: 4, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
-              >
-                <div className="relative z-20 text-center">
-                  <div
-                    className="text-2xl lg:text-3xl font-black mb-4 drop-shadow-2xl leading-tight"
-                    style={{
-                      color: getRgbColor(grupo.baseColor, 1.8),
-                      textShadow: `0 0 20px ${getRgbColor(grupo.baseColor, 1)}`,
-                    }}
-                  >
-                    {rank}
-                  </div>
-                  <div className="text-lg font-semibold text-white/95 uppercase tracking-wide mb-2">
-                    Nível {j + 1}
-                  </div>
-                  <div className="w-full h-1 bg-gradient-to-r from-transparent via-white/50 to-transparent rounded-full" />
-                </div>
-
-                <div
-                  className="absolute inset-0 opacity-70"
-                  style={{
-                    background: `radial-gradient(circle at 25% 75%, ${getRgbColor(grupo.baseColor, 1.2)} 0%, transparent 55%)`,
-                  }}
-                />
-
-                <div className="absolute top-6 right-8 w-3 h-3 bg-white/40 rounded-full animate-ping" />
-                <div className="absolute bottom-8 left-8 w-2 h-2 bg-white/30 rounded-full animate-ping [animation-delay:0.5s]" />
-                <div className="absolute top-1/2 left-4 w-1 h-1 bg-white/50 rounded-full animate-pulse" />
-              </motion.div>
-            ))}
-          </div>
-        </motion.section>
-      ))}
+      </div>
     </div>
   );
 }
@@ -502,71 +596,117 @@ function renderHierarquia({ getRgbColor }: any) {
 function renderDashboard({ userLogged }: any) {
   if (!userLogged) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="text-4xl">🔐 LOGIN REQUERIDO</div>
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center p-10 bg-black/60 border border-yellow-500/30 rounded-3xl">
+          <div className="text-5xl mb-4">🔐</div>
+          <div className="text-3xl font-black text-yellow-400">LOGIN REQUERIDO</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-      <motion.div
-        className="p-8 bg-gradient-to-br from-green-900/80 to-black/60 border border-green-500/50 rounded-3xl col-span-1 lg:col-span-2"
-        whileHover={{ scale: 1.02 }}
-      >
-        <h3 className="text-3xl font-black text-green-400 mb-6">STATUS OPERACIONAL</h3>
-        <div className="grid grid-cols-2 gap-6 text-lg">
-          <div>
-            <span className="text-zinc-400">Unidade:</span> <span className="font-bold text-green-300">ATIVA</span>
-          </div>
-          <div>
-            <span className="text-zinc-400">Posição:</span> <span className="font-bold text-yellow-300">BR-116 KM 420</span>
-          </div>
-          <div>
-            <span className="text-zinc-400">Status:</span> <span className="font-bold text-green-300">PATRULHAMENTO</span>
-          </div>
-          <div>
-            <span className="text-zinc-400">Equipe:</span> <span className="font-bold text-blue-300">4 UNIDADES</span>
-          </div>
+    <div className="grid lg:grid-cols-3 gap-6">
+      <div className="p-6 bg-black/70 border border-green-500/30 rounded-3xl lg:col-span-2">
+        <h3 className="text-3xl font-black text-green-400 mb-4">STATUS OPERACIONAL</h3>
+        <div className="grid md:grid-cols-2 gap-4 text-lg">
+          <div className="p-4 bg-white/5 rounded-2xl">Unidade: <span className="text-green-300 font-bold">ATIVA</span></div>
+          <div className="p-4 bg-white/5 rounded-2xl">Posição: <span className="text-yellow-300 font-bold">BR-116 KM 420</span></div>
+          <div className="p-4 bg-white/5 rounded-2xl">Status: <span className="text-green-300 font-bold">PATRULHAMENTO</span></div>
+          <div className="p-4 bg-white/5 rounded-2xl">Equipe: <span className="text-blue-300 font-bold">4 UNIDADES</span></div>
         </div>
-      </motion.div>
-
-      <motion.div
-        className="p-8 bg-gradient-to-br from-blue-900/80 to-black/60 border border-blue-500/50 rounded-3xl"
-        whileHover={{ scale: 1.02 }}
-      >
+      </div>
+      <div className="p-6 bg-black/70 border border-blue-500/30 rounded-3xl">
         <h3 className="text-2xl font-black text-blue-400 mb-4">PRÓXIMAS AÇÕES</h3>
-        <div className="space-y-3 text-sm">
-          <div className="flex gap-2"><span>▶️</span><span>Abordagem KM 425</span></div>
-          <div className="flex gap-2"><span>▶️</span><span>Bloqueio planejado</span></div>
-          <div className="flex gap-2"><span>▶️</span><span>Fiscalização cargas</span></div>
+        <div className="space-y-3 text-sm text-zinc-300">
+          <div>▶️ Abordagem KM 425</div>
+          <div>▶️ Bloqueio planejado</div>
+          <div>▶️ Fiscalização de cargas</div>
+          <div>▶️ Apoio a unidade regional</div>
         </div>
-      </motion.div>
+      </div>
+      <div className="p-6 bg-black/70 border border-yellow-500/30 rounded-3xl">
+        <h3 className="text-2xl font-black text-yellow-400 mb-4">PAINEL RÁDIO</h3>
+        <div className="space-y-2 text-zinc-300">
+          <div>QAP • Central</div>
+          <div>QTH • BR-116</div>
+          <div>QRR • Em espera</div>
+          <div>QSL • Confirmado</div>
+        </div>
+      </div>
     </div>
   );
 }
 
-function renderViaturas() {
+function renderHistoria() {
+  return (
+    <div className="grid md:grid-cols-2 gap-6">
+      {historia.map((h, i) => (
+        <motion.div key={i} className="p-6 bg-black/70 border border-yellow-500/30 rounded-3xl" whileHover={{ scale: 1.02 }}>
+          <div className="text-2xl font-black text-yellow-400">{h.ano}</div>
+          <div className="text-xl font-bold text-white mt-2">{h.evento}</div>
+          <p className="text-zinc-300 mt-3">{h.desc}</p>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+function renderDoutrina() {
+  return (
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {doutrina.map((d, i) => (
+        <motion.div key={i} className="p-5 bg-black/70 border border-yellow-500/30 rounded-2xl" whileHover={{ scale: 1.02 }}>
+          <div className="text-lg font-bold text-yellow-300">• {d}</div>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+function renderHierarquia({ getRgbColor }: any) {
   return (
     <div className="space-y-12">
+      {hierarchy.map((grupo, i) => (
+        <motion.div key={i} className={`p-6 bg-black/70 border ${grupo.border} rounded-3xl`} whileHover={{ scale: 1.01 }}>
+          <h3 className="text-4xl font-black mb-6 text-center" style={{ color: getRgbColor(grupo.baseColor, 1.5) }}>
+            {grupo.level}
+          </h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {grupo.ranks.map((rank, j) => (
+              <motion.div
+                key={j}
+                className="p-5 rounded-2xl border border-white/10 relative overflow-hidden"
+                style={{ background: `linear-gradient(135deg, rgba(0,0,0,0.9), ${getRgbColor(grupo.baseColor, 0.35)})` }}
+                whileHover={{ scale: 1.05 }}
+                animate={{
+                  backgroundColor: ["rgba(0,0,0,0.9)", getRgbColor(grupo.baseColor, 0.6), "rgba(0,0,0,0.9)"],
+                }}
+                transition={{ duration: 4, repeat: Infinity, repeatType: "reverse" }}
+              >
+                <div className="text-2xl font-black text-white text-center">{rank}</div>
+                <div className="text-xs text-zinc-300 text-center mt-2">Cargo {j + 1}</div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+function renderCodigos() {
+  return (
+    <div className="space-y-8">
       <div className="text-center">
-        <h1 className="text-6xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-8">
-          FROTA PRF 2026
-        </h1>
+        <h1 className="text-6xl font-black text-purple-400 mb-4">CÓDIGOS RÁDIO</h1>
+        <p className="text-zinc-400 text-lg">Q Codes, 10 Codes e códigos operacionais</p>
       </div>
-      <div className="grid md:grid-cols-2 gap-8">
-        {viaturas.map((viatura, i) => (
-          <motion.div
-            key={i}
-            className="p-10 bg-black/70 border-4 border-blue-500/40 rounded-3xl backdrop-blur-xl group hover:border-blue-400/80"
-            whileHover={{ y: -15, scale: 1.02 }}
-          >
-            <div className="text-3xl font-black text-blue-400 mb-6 text-center">{viatura.modelo}</div>
-            <div className="space-y-4 text-lg">
-              <div><strong>🗓️ Ano:</strong> <span className="text-blue-300">{viatura.ano}</span></div>
-              <div><strong>🎯 Uso:</strong> <span className="text-blue-300">{viatura.uso}</span></div>
-              <div><strong>🎨 Cor:</strong> <span className="text-blue-300 font-mono">{viatura.cor}</span></div>
-            </div>
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {codigos.map((codigo, i) => (
+          <motion.div key={i} className="p-6 bg-black/70 border border-purple-500/30 rounded-3xl" whileHover={{ scale: 1.03 }}>
+            <div className="text-4xl font-black text-purple-400 text-center">{codigo.c}</div>
+            <div className="text-zinc-200 mt-4 text-center">{codigo.d}</div>
           </motion.div>
         ))}
       </div>
@@ -574,70 +714,168 @@ function renderViaturas() {
   );
 }
 
-function renderEquipamentos() {
+function renderMiranda() {
   return (
-    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {equipamentos.map((equip, i) => (
-        <motion.div
-          key={i}
-          className="p-8 bg-black/60 border border-green-500/40 rounded-3xl hover:border-green-400/70 group"
-          whileHover={{ scale: 1.05, y: -10 }}
-        >
-          <div className="text-3xl mb-4 text-green-400">{getEquipIcon(equip.tipo)}</div>
-          <h4 className="text-2xl font-black text-green-400 mb-4 group-hover:text-green-300">{equip.nome}</h4>
-          <div className="text-zinc-300 text-lg">{equip.tipo}</div>
+    <div className="max-w-4xl mx-auto space-y-8">
+      <div className="text-center">
+        <h1 className="text-6xl font-black text-red-400 mb-4">CÓDIGO DE MIRANDA</h1>
+        <p className="text-zinc-400 text-lg">Direitos do abordado / preso</p>
+      </div>
+      <div className="grid gap-4">
+        {miranda.map((item, i) => (
+          <div key={i} className="p-5 bg-black/70 border border-red-500/30 rounded-2xl text-lg text-zinc-200">
+            • {item}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function renderOperacoes() {
+  return (
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {operacoes.map((o, i) => (
+        <div key={i} className="p-5 bg-black/70 border border-yellow-500/30 rounded-2xl text-yellow-200">
+          • {o}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function renderTreinamento() {
+  return (
+    <div className="grid md:grid-cols-2 gap-6">
+      {treinamento.map((t, i) => (
+        <motion.div key={i} className="p-6 bg-black/70 border border-blue-500/30 rounded-3xl" whileHover={{ scale: 1.02 }}>
+          <div className="text-2xl font-black text-blue-300">{t.nome}</div>
+          <p className="text-zinc-300 mt-3">{t.detalhe}</p>
         </motion.div>
       ))}
     </div>
   );
 }
 
-function renderRecrutamento() {
+function renderEquipamentos() {
   return (
-    <div className="max-w-4xl mx-auto space-y-12">
-      <div className="text-center py-16">
-        <h1 className="text-6xl font-black bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent mb-8">
-          RECRUTAMENTO PRF 2026
-        </h1>
-        <div className="w-40 h-1 bg-gradient-to-r from-emerald-400 to-teal-400 mx-auto rounded-full" />
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-12">
-        <motion.div
-          className="space-y-6 p-10 bg-black/70 border border-emerald-500/50 rounded-3xl"
-          whileHover={{ scale: 1.02 }}
-        >
-          <h3 className="text-3xl font-black text-emerald-400 mb-6">REQUISITOS</h3>
-          <div className="space-y-4 text-xl">
-            {recrutamento.map((req, i) => (
-              <div key={i} className="flex items-center gap-4 p-4 bg-black/50 rounded-2xl border-l-4 border-emerald-400">
-                <div className="w-3 h-3 bg-emerald-400 rounded-full" />
-                <span>{req}</span>
-              </div>
-            ))}
-          </div>
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {equipamentos.map((equip, i) => (
+        <motion.div key={i} className="p-6 bg-black/70 border border-green-500/30 rounded-3xl" whileHover={{ scale: 1.03 }}>
+          <div className="text-3xl text-green-400 mb-3">{getEquipIcon(equip.tipo)}</div>
+          <div className="text-2xl font-black text-green-300">{equip.nome}</div>
+          <div className="text-zinc-400 mt-2">{equip.tipo}</div>
         </motion.div>
+      ))}
+    </div>
+  );
+}
 
-        <motion.div
-          className="space-y-6 p-10 bg-gradient-to-br from-emerald-900/80 to-black/60 border border-emerald-500/50 rounded-3xl"
-          whileHover={{ scale: 1.02 }}
-        >
-          <h3 className="text-3xl font-black text-emerald-300 mb-6">PROCESSO</h3>
-          <div className="space-y-4">
-            <div className="flex items-center gap-4 p-4 bg-black/50 rounded-2xl">
-              <div className="w-10 h-10 bg-emerald-500/30 rounded-xl flex items-center justify-center font-bold text-emerald-400">1</div>
-              <span className="font-semibold">Prova Objetiva</span>
-            </div>
-            <div className="flex items-center gap-4 p-4 bg-black/50 rounded-2xl">
-              <div className="w-10 h-10 bg-emerald-500/30 rounded-xl flex items-center justify-center font-bold text-emerald-400">2</div>
-              <span className="font-semibold">TAF</span>
-            </div>
-            <div className="flex items-center gap-4 p-4 bg-black/50 rounded-2xl">
-              <div className="w-10 h-10 bg-emerald-500/30 rounded-xl flex items-center justify-center font-bold text-emerald-400">3</div>
-              <span className="font-semibold">Curso Formação</span>
-            </div>
-          </div>
+function renderViaturas() {
+  return (
+    <div className="grid md:grid-cols-2 gap-6">
+      {viaturas.map((v, i) => (
+        <motion.div key={i} className="p-6 bg-black/70 border border-cyan-500/30 rounded-3xl" whileHover={{ scale: 1.03 }}>
+          <div className="text-2xl font-black text-cyan-300">{v.nome}</div>
+          <div className="text-zinc-300 mt-2">Uso: {v.uso}</div>
+          <div className="text-zinc-300">Status: {v.status}</div>
         </motion.div>
+      ))}
+    </div>
+  );
+}
+
+function renderArmas() {
+  return (
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {armas.map((a, i) => (
+        <div key={i} className="p-6 bg-black/70 border border-red-500/30 rounded-3xl">
+          <div className="text-2xl font-black text-red-300">{a.nome}</div>
+          <div className="text-zinc-300 mt-2">Calibre: {a.calibre}</div>
+          <div className="text-zinc-300">Uso: {a.uso}</div>
+          <div className="text-zinc-300">Capacidade: {a.cap}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function renderUniformes() {
+  return (
+    <div className="grid md:grid-cols-2 gap-6">
+      {[
+        { nome: "Uniforme Operacional", desc: "Padrão de serviço em patrulha e fiscalização." },
+        { nome: "Uniforme Tático", desc: "Uso em ações especiais e operações de risco." },
+        { nome: "Uniforme Administrativo", desc: "Atuação interna, comando e gestão." },
+        { nome: "Uniforme RP", desc: "Versão visual para ambientação do servidor." },
+        { nome: "Uniforme de Curso", desc: "Utilizado em treinamentos e capacitações." },
+        { nome: "Uniforme de Cerimônia", desc: "Eventos, solenidades e apresentações." },
+      ].map((u, i) => (
+        <div key={i} className="p-6 bg-black/70 border border-white/10 rounded-3xl">
+          <div className="text-2xl font-black text-white">{u.nome}</div>
+          <p className="text-zinc-300 mt-3">{u.desc}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function renderManual() {
+  return (
+    <div className="grid md:grid-cols-2 gap-4">
+      {manualOperacional.map((item, i) => (
+        <div key={i} className="p-5 bg-black/70 border border-yellow-500/30 rounded-2xl text-zinc-200">
+          • {item}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function renderEstatisticas() {
+  return (
+    <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-5">
+      {[
+        { label: "Km Patroliados", value: "2.5M" },
+        { label: "Abordagens", value: "1.2M" },
+        { label: "Prisões", value: "12K" },
+        { label: "Resgates", value: "45K" },
+        { label: "Operações", value: "8K" },
+      ].map((s, i) => (
+        <div key={i} className="p-6 bg-black/70 border border-yellow-500/30 rounded-3xl text-center">
+          <div className="text-3xl font-black text-yellow-400">{s.value}</div>
+          <div className="text-sm text-zinc-400 mt-2">{s.label}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function renderTimeline() {
+  return (
+    <div className="grid md:grid-cols-2 gap-6">
+      {timeline.map((item, i) => (
+        <div key={i} className="p-6 bg-black/70 border border-orange-500/30 rounded-3xl">
+          <div className="text-2xl font-black text-orange-400">{item.ano}</div>
+          <div className="text-xl font-bold mt-2">{item.titulo}</div>
+          <p className="text-zinc-300 mt-3">{item.desc}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function renderRadio() {
+  return (
+    <div className="max-w-3xl mx-auto text-center space-y-8">
+      <div className="text-7xl">📡</div>
+      <h2 className="text-5xl font-black text-green-400">RÁDIO OPERACIONAL</h2>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {["QAP", "QTH", "10-4", "Código 5"].map((c, i) => (
+          <div key={i} className="p-5 bg-black/70 border border-green-500/30 rounded-2xl text-green-300 font-mono font-bold">
+            {c}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -651,10 +889,7 @@ function renderChat({ chatMessages, sendChatMessage, chatRef }: any) {
         <div className="w-32 h-2 bg-green-500/50 mx-auto rounded-full" />
       </div>
 
-      <div
-        ref={chatRef}
-        className="flex-1 bg-black/80 border border-green-500/40 rounded-3xl p-6 overflow-y-auto space-y-3 mb-6"
-      >
+      <div ref={chatRef} className="flex-1 bg-black/80 border border-green-500/40 rounded-3xl p-6 overflow-y-auto space-y-3 mb-6">
         {chatMessages.map((msg: string, i: number) => (
           <div key={i} className="flex gap-3 p-3 bg-black/60 border border-green-500/30 rounded-2xl">
             <div className="w-8 h-8 bg-green-500/30 rounded-xl flex items-center justify-center font-mono text-xs text-green-400">
@@ -690,26 +925,248 @@ function renderChat({ chatMessages, sendChatMessage, chatRef }: any) {
   );
 }
 
-function renderCodigos() {
+function renderDiscord() {
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="text-center mb-16">
-        <h1 className="text-6xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-8">
-          CÓDIGOS RÁDIO PRF
-        </h1>
-      </div>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {codigos.map((codigo, i) => (
-          <motion.div
-            key={i}
-            className="p-8 bg-black/70 border border-purple-500/40 rounded-3xl group hover:border-purple-400/80 backdrop-blur-xl"
-            whileHover={{ scale: 1.05, rotateY: 5 }}
-          >
-            <div className="text-4xl font-mono font-black text-purple-400 mb-4 text-center">{codigo.c}</div>
-            <div className="text-zinc-200 text-lg leading-relaxed">{codigo.d}</div>
-          </motion.div>
+    <div className="max-w-3xl mx-auto text-center space-y-6">
+      <div className="text-7xl">💬</div>
+      <h2 className="text-5xl font-black text-indigo-400">DISCORD PRF</h2>
+      <div className="grid gap-4">
+        {servidoresDiscord.map((srv, i) => (
+          <a key={i} href={srv.link} target="_blank" rel="noreferrer" className="block p-6 bg-black/70 border border-indigo-500/30 rounded-3xl">
+            <div className="text-2xl font-black text-indigo-300">{srv.nome}</div>
+            <div className="text-zinc-400 mt-2">{srv.link}</div>
+          </a>
         ))}
       </div>
+    </div>
+  );
+}
+
+function renderServidoresDiscord() {
+  return (
+    <div className="max-w-4xl mx-auto space-y-8">
+      <div className="text-center">
+        <h1 className="text-6xl font-black text-indigo-400 mb-4">SERVIDORES DISCORD</h1>
+        <p className="text-zinc-400 text-lg">Acesso direto às comunidades</p>
+      </div>
+      <div className="grid gap-6">
+        {servidoresDiscord.map((srv, i) => (
+          <a
+            key={i}
+            href={srv.link}
+            target="_blank"
+            rel="noreferrer"
+            className="p-6 bg-black/70 border border-indigo-500/30 rounded-3xl hover:bg-indigo-500/10 transition-all"
+          >
+            <div className="text-2xl font-black text-indigo-300">{srv.nome}</div>
+            <div className="text-zinc-400 mt-2">{srv.link}</div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function renderRecrutamento() {
+  return (
+    <div className="max-w-4xl mx-auto space-y-8">
+      <h2 className="text-5xl font-black text-emerald-400 text-center">RECRUTAMENTO PRF</h2>
+      <div className="grid md:grid-cols-2 gap-6">
+        {[
+          "CNH categoria B",
+          "Ensino médio completo",
+          "Disciplina e presença",
+          "Boa comunicação",
+          "Disponibilidade para escala",
+          "Compromisso com RP",
+          "Leitura de rádio e comando",
+          "Respeito à hierarquia",
+        ].map((item, i) => (
+          <div key={i} className="p-5 bg-black/70 border border-emerald-500/30 rounded-2xl">
+            • {item}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function renderNoticias() {
+  return (
+    <div className="max-w-4xl mx-auto space-y-6">
+      <h2 className="text-5xl font-black text-orange-400 text-center">NOTÍCIAS</h2>
+      {[
+        { titulo: "Nova operação integrada na rodovia", data: "09/05/2026" },
+        { titulo: "Treinamento interno reforça patrulha", data: "08/05/2026" },
+        { titulo: "Central atualiza protocolo de rádio", data: "07/05/2026" },
+        { titulo: "Frota recebe novas viaturas RP", data: "06/05/2026" },
+      ].map((n, i) => (
+        <div key={i} className="p-6 bg-black/70 border border-orange-500/30 rounded-3xl">
+          <div className="text-2xl font-bold text-white">{n.titulo}</div>
+          <div className="text-sm text-zinc-500 mt-2">{n.data}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function renderGaleria() {
+  return (
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {["Viaturas", "Operações", "Treinos", "Rádio", "Comando", "Fronteira", "Patrulha", "Equipe", "Base", "Ação", "Controle", "Pátio"].map((item, i) => (
+        <div key={i} className="p-8 bg-black/70 border border-white/10 rounded-3xl text-center">
+          <div className="text-3xl font-black text-yellow-300">{item}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function renderConfig() {
+  return (
+    <div className="max-w-4xl mx-auto space-y-4">
+      <h2 className="text-5xl font-black text-sky-400 text-center">CONFIGURAÇÕES</h2>
+      {["Tema visual", "Som ambiente", "Vídeo de fundo", "Idioma", "Permissões", "Preferências do RP", "RGB", "Modo operacional"].map((c, i) => (
+        <div key={i} className="p-5 bg-black/70 border border-sky-500/30 rounded-2xl">
+          • {c}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function renderCreditos() {
+  return (
+    <div className="max-w-4xl mx-auto space-y-6">
+      <h2 className="text-5xl font-black text-yellow-300 text-center">CRÉDITOS</h2>
+      {creditos.map((c, i) => (
+        <div key={i} className="p-5 bg-black/70 border border-yellow-500/30 rounded-2xl">
+          • {c}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function renderSimulador() {
+  return (
+    <div className="max-w-4xl mx-auto space-y-6 text-center">
+      <h2 className="text-5xl font-black text-red-400">SIMULADOR RP</h2>
+      <div className="grid md:grid-cols-2 gap-6">
+        {["Checkpoints", "Abordagem", "Bloqueio", "Resgate", "Rádio", "Patrulha", "Operação", "Comando", "Fiscalização", "Perseguição"].map((s, i) => (
+          <div key={i} className="p-6 bg-black/70 border border-red-500/30 rounded-3xl">
+            {s}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function renderRankings() {
+  return (
+    <div className="max-w-4xl mx-auto space-y-4">
+      <h2 className="text-5xl font-black text-green-400 text-center">RANKINGS</h2>
+      {ranking.map((r, i) => (
+        <div key={i} className="flex justify-between p-5 bg-black/70 border border-green-500/30 rounded-2xl">
+          <span>{i + 1}. {r.nome}</span>
+          <span className="font-black text-green-300">{r.pontos} pts</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function renderOcorrencias() {
+  return (
+    <div className="grid md:grid-cols-2 gap-6">
+      {ocorrencias.map((o, i) => (
+        <div key={i} className="p-6 bg-black/70 border border-red-500/30 rounded-3xl">
+          <div className="text-2xl font-black text-red-300">{o.tipo}</div>
+          <p className="text-zinc-300 mt-3">{o.detalhe}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function renderCursos() {
+  return (
+    <div className="grid md:grid-cols-2 gap-6">
+      {cursos.map((c, i) => (
+        <div key={i} className="p-6 bg-black/70 border border-blue-500/30 rounded-3xl">
+          <div className="text-2xl font-black text-blue-300">{c.nome}</div>
+          <p className="text-zinc-300 mt-3">{c.desc}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function renderFrota() {
+  return (
+    <div className="grid md:grid-cols-2 gap-6">
+      {frota.map((f, i) => (
+        <div key={i} className="p-6 bg-black/70 border border-cyan-500/30 rounded-3xl">
+          <div className="text-2xl font-black text-cyan-300">{f.modelo}</div>
+          <p className="text-zinc-300 mt-3">Setor: {f.setor}</p>
+          <p className="text-zinc-300">Ativo: {f.ativo}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function renderSetores() {
+  return (
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {setores.map((s, i) => (
+        <div key={i} className="p-6 bg-black/70 border border-purple-500/30 rounded-3xl">
+          <div className="text-2xl font-black text-purple-300">{s.nome}</div>
+          <p className="text-zinc-300 mt-3">{s.desc}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function renderBoletim() {
+  return (
+    <div className="max-w-5xl mx-auto space-y-4">
+      <h2 className="text-5xl font-black text-yellow-400 text-center">BOLETIM</h2>
+      {boletins.map((b, i) => (
+        <div key={i} className="p-5 bg-black/70 border border-yellow-500/30 rounded-2xl">
+          <div className="text-2xl font-bold text-white">{b.titulo}</div>
+          <div className="text-zinc-300 mt-2">{b.desc}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function renderAgenda() {
+  return (
+    <div className="grid md:grid-cols-2 gap-6">
+      {agenda.map((a, i) => (
+        <div key={i} className="p-6 bg-black/70 border border-yellow-500/30 rounded-3xl">
+          <div className="text-2xl font-black text-yellow-300">{a.dia}</div>
+          <p className="text-zinc-300 mt-3">{a.evento}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function renderPatrulha() {
+  return (
+    <div className="grid md:grid-cols-2 gap-6">
+      {patrulha.map((p, i) => (
+        <div key={i} className="p-6 bg-black/70 border border-green-500/30 rounded-3xl">
+          <div className="text-2xl font-black text-green-300">{p.posto}</div>
+          <p className="text-zinc-300 mt-3">Status: {p.status}</p>
+          <p className="text-zinc-300">Equipe: {p.equipe}</p>
+        </div>
+      ))}
     </div>
   );
 }
@@ -720,64 +1177,10 @@ function getEquipIcon(tipo: string) {
     Alcoolemia: "🍺",
     Proteção: "🛡️",
     Sinalização: "🚨",
+    Comunicação: "📡",
+    Registro: "🎥",
+    "Base": "🏢",
+    "Operação": "⚙️",
   };
   return icons[tipo] || "🛠️";
-}
-
-function renderNoticias() {
-  return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <div className="text-center">
-        <h1 className="text-5xl font-black bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
-          ÚLTIMAS NOTÍCIAS
-        </h1>
-      </div>
-      {noticias.map((noticia, i) => (
-        <motion.div
-          key={i}
-          className="group p-8 bg-black/70 border-l-8 border-orange-500 rounded-2xl hover:bg-orange-500/10 transition-all cursor-pointer"
-          whileHover={{ x: 20 }}
-        >
-          <div className="flex gap-4 items-start">
-            <div className="w-2 h-2 bg-orange-400 rounded-full mt-3 flex-shrink-0" />
-            <div className="flex-1">
-              <h3 className="text-2xl font-bold text-white group-hover:text-orange-400 mb-2 leading-tight">
-                {noticia.titulo}
-              </h3>
-              <div className="text-zinc-500 text-sm font-mono">{noticia.data}</div>
-            </div>
-          </div>
-        </motion.div>
-      ))}
-    </div>
-  );
-}
-
-function renderRadio() {
-  return (
-    <div className="max-w-2xl mx-auto text-center py-20">
-      <div className="text-7xl mb-12 animate-pulse">📡</div>
-      <h1 className="text-5xl font-black text-green-400 mb-8">RÁDIO OPERACIONAL</h1>
-      <p className="text-xl text-zinc-400 mb-12 max-w-2xl mx-auto">
-        Simulador de comunicação via rádio PRF ativo. Use a página CHAT para testar códigos Q e 10-Codes em tempo real.
-      </p>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto mt-16">
-        <div className="p-6 bg-green-500/20 border border-green-500/50 rounded-2xl font-mono text-green-400 font-bold">QAP</div>
-        <div className="p-6 bg-green-500/20 border border-green-500/50 rounded-2xl font-mono text-green-400 font-bold">QTH</div>
-        <div className="p-6 bg-green-500/20 border border-green-500/50 rounded-2xl font-mono text-green-400 font-bold">10-4</div>
-        <div className="p-6 bg-green-500/20 border border-green-500/50 rounded-2xl font-mono text-green-400 font-bold">Código 5</div>
-      </div>
-    </div>
-  );
-}
-
-function getColorClass(color: string) {
-  const map: Record<string, string> = {
-    yellow: "text-yellow-400",
-    green: "text-green-400",
-    orange: "text-orange-400",
-    red: "text-red-400",
-    blue: "text-blue-400",
-  };
-  return map[color] || "text-white";
 }
