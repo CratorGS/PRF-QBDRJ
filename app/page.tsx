@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState } from "react";
 
 const ranks = [
   "Recruta",
@@ -13,169 +12,210 @@ const ranks = [
   "Comando Geral",
 ];
 
-type Profile = {
-  name: string;
-  rank: string;
-  xp: number;
-  missions: number;
-};
+const rules = [
+  "Hierarquia deve ser respeitada em qualquer operação.",
+  "Comunicação via rádio deve ser objetiva e limpa.",
+  "Abordagem sempre com protocolo de segurança.",
+  "Uso de força apenas proporcional e necessário.",
+  "Relatórios obrigatórios após operações.",
+];
 
-export default function PRFMilitaryCore() {
-  const [page, setPage] = useState("dashboard");
+const doctrine = [
+  "QAP: Escuta ativa contínua obrigatória.",
+  "QTH: Identificação de posição operacional.",
+  "Código 1: Patrulhamento preventivo.",
+  "Código 3: Emergência prioritária.",
+  "Código 5: Operação tática ativa.",
+  "Comunicação sempre objetiva e curta.",
+];
 
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+type Page = "dashboard" | "radio" | "rules" | "doctrine" | "ops";
 
-  const [profile, setProfile] = useState<Profile>({
-    name: "Operador PRF",
-    rank: "Recruta",
-    xp: 0,
-    missions: 0,
-  });
+export default function Home() {
+  const [page, setPage] = useState<Page>("dashboard");
+  const [rank, setRank] = useState("Recruta");
+  const [xp, setXp] = useState(0);
+  const [missions, setMissions] = useState(0);
+  const [logs, setLogs] = useState<string[]>([]);
 
-  const [radio, setRadio] = useState([
-    "QAP — Sistema inicializado",
-    "QTH — Central operacional ativa",
-  ]);
-
-  // LOAD LOCALSTORAGE
+  // 🎧 SYSTEM BOOT
   useEffect(() => {
-    const saved = localStorage.getItem("prf_military");
-    if (saved) {
-      try {
-        setProfile(JSON.parse(saved));
-      } catch {}
-    }
+    setLogs([
+      "PRF QBDRJ SYSTEM BOOTED",
+      "QTH: Central operacional online",
+      "QAP: Sistema pronto",
+    ]);
   }, []);
 
-  // SAVE LOCALSTORAGE
-  useEffect(() => {
-    localStorage.setItem("prf_military", JSON.stringify(profile));
-  }, [profile]);
-
-  // AUDIO
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = 0.2;
-      audioRef.current.play().catch(() => {});
-    }
-  }, []);
-
-  // RADIO SYSTEM
+  // 📡 RADIO SYSTEM
   useEffect(() => {
     const interval = setInterval(() => {
       const msgs = [
-        "QAP — Patrulha ativa na BR-040",
-        "ALERTA — Movimento suspeito detectado",
-        "QTH — Unidade reposicionada",
-        "CÓDIGO 5 — Operação em andamento",
+        "QAP: Patrulha ativa na região",
+        "ALERTA: Movimento suspeito detectado",
+        "QTH: Unidade reposicionada",
+        "CÓDIGO 3: Operação em andamento",
+        "STATUS: Área controlada",
       ];
 
-      setRadio((prev) => [
+      setLogs((prev) => [
         msgs[Math.floor(Math.random() * msgs.length)],
-        ...prev.slice(0, 6),
+        ...prev.slice(0, 8),
       ]);
-    }, 3500);
+    }, 3000);
 
     return () => clearInterval(interval);
   }, []);
 
-  const addXP = () => {
-    let xp = profile.xp + 25;
-    let idx = ranks.indexOf(profile.rank);
+  // 🎮 AUTO PROGRESS
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setXp((old) => {
+        let newXp = old + 12;
+        let idx = ranks.indexOf(rank);
 
-    if (xp >= 100) {
-      xp = 0;
-      idx = Math.min(idx + 1, ranks.length - 1);
-    }
+        if (newXp >= 100 && idx < ranks.length - 1) {
+          newXp = 0;
+          idx++;
+          setRank(ranks[idx]);
+        }
 
-    setProfile({
-      ...profile,
-      xp,
-      rank: ranks[idx],
-      missions: profile.missions + 1,
-    });
+        return newXp;
+      });
+
+      setMissions((m) => m + 1);
+    }, 6000);
+
+    return () => clearInterval(interval);
+  }, [rank]);
+
+  const playBeep = () => {
+    const audio = new Audio("/beethoven.mp3");
+    audio.volume = 0.15;
+    audio.play().catch(() => {});
   };
 
-  return (
-    <div className="min-h-screen text-white bg-black overflow-hidden relative">
+  const NavButton = (label: string, p: Page) => (
+    <button
+      onClick={() => {
+        playBeep();
+        setPage(p);
+      }}
+      className={`px-3 py-1 text-xs border ${
+        page === p ? "border-green-400 bg-green-500/10" : "border-green-500/30"
+      }`}
+    >
+      {label}
+    </button>
+  );
 
-      {/* BACKGROUND VIDEO */}
-      <div className="fixed inset-0 z-0">
-        <iframe
-          title="background-video"
-          className="w-full h-full scale-125 opacity-40 pointer-events-none"
-          src="https://www.youtube.com/embed/-He5xYWa8kY?autoplay=1&mute=1&controls=0&loop=1&playlist=-He5xYWa8kY"
-        />
-        <div className="absolute inset-0 bg-black/70" />
-      </div>
+  return (
+    <div className="min-h-screen bg-black text-green-400 font-mono">
 
       {/* AUDIO */}
-      <audio
-        ref={audioRef}
-        src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3"
-      />
+      <audio autoPlay loop>
+        <source src="/beethoven.mp3" type="audio/mpeg" />
+      </audio>
 
       {/* HEADER */}
-      <div className="fixed top-0 w-full z-50 bg-black/80 border-b border-green-500/30">
-        <div className="max-w-7xl mx-auto flex justify-between px-6 py-4">
-          <h1 className="text-green-400 font-black tracking-[0.3em]">
-            PRF MILITARY SYSTEM
-          </h1>
+      <header className="border-b border-green-500/30 p-4 flex justify-between">
+        <h1 className="tracking-[0.3em] font-bold">
+          PRF QBDRJ // FULL SYSTEM
+        </h1>
+        <span className="text-xs animate-pulse">● ONLINE</span>
+      </header>
 
-          <div className="flex gap-2">
-            {["dashboard", "academy", "missions", "radio", "profile"].map((p) => (
-              <button
-                key={p}
-                onClick={() => setPage(p)}
-                className="px-3 py-1 text-xs border border-green-500/30"
-              >
-                {p.toUpperCase()}
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* NAV */}
+      <div className="p-3 flex gap-2 flex-wrap border-b border-green-500/20">
+        {NavButton("DASHBOARD", "dashboard")}
+        {NavButton("RÁDIO", "radio")}
+        {NavButton("REGRAS", "rules")}
+        {NavButton("DOUTRINA", "doctrine")}
+        {NavButton("OPERAÇÕES", "ops")}
       </div>
 
       {/* CONTENT */}
-      <div className="pt-28 max-w-6xl mx-auto px-6 relative z-10">
+      <main className="p-6 grid md:grid-cols-3 gap-4">
 
-        <AnimatePresence mode="wait">
+        {/* DASHBOARD */}
+        {page === "dashboard" && (
+          <>
+            <div className="border border-green-500/30 p-4">
+              <h2 className="font-bold mb-2">STATUS</h2>
+              <p>Patente: {rank}</p>
+              <p>XP: {xp}/100</p>
+              <p>Missões: {missions}</p>
 
-          {page === "dashboard" && (
-            <motion.div key="dash">
-              <h2 className="text-5xl font-black text-green-400">
-                CENTRO DE OPERAÇÕES
-              </h2>
-
-              <div className="grid md:grid-cols-3 gap-6 mt-10">
-
-                <div className="p-6 border border-green-500/30 bg-black/60 rounded-xl">
-                  <p>PATENTE</p>
-                  <h3 className="font-black">{profile.rank}</h3>
-                </div>
-
-                <div className="p-6 border border-green-500/30 bg-black/60 rounded-xl">
-                  <p>XP</p>
-                  <h3>{profile.xp}/100</h3>
-                  <button
-                    onClick={addXP}
-                    className="mt-4 bg-green-500 text-black px-3 py-1"
-                  >
-                    SIMULAR OPERAÇÃO
-                  </button>
-                </div>
-
-                <div className="p-6 border border-green-500/30 bg-black/60 rounded-xl">
-                  <p>MISSÕES</p>
-                  <h3>{profile.missions}</h3>
-                </div>
-
+              <div className="mt-3 h-2 bg-green-900/40">
+                <div
+                  className="h-full bg-green-500 transition-all"
+                  style={{ width: `${xp}%` }}
+                />
               </div>
-            </motion.div>
-          )}
+            </div>
 
-        </AnimatePresence>
-      </div>
+            <div className="border border-green-500/30 p-4 md:col-span-2">
+              <h2 className="font-bold mb-2">RÁDIO OPERACIONAL</h2>
+              <div className="space-y-1 text-sm max-h-64 overflow-auto">
+                {logs.map((l, i) => (
+                  <p key={i}>📡 {l}</p>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* RADIO FULL */}
+        {page === "radio" && (
+          <div className="md:col-span-3 border border-green-500/30 p-4">
+            <h2 className="font-bold mb-2">RÁDIO FULL SYSTEM</h2>
+            {logs.map((l, i) => (
+              <p key={i}>📡 {l}</p>
+            ))}
+          </div>
+        )}
+
+        {/* RULES */}
+        {page === "rules" && (
+          <div className="md:col-span-3 border border-green-500/30 p-4">
+            <h2 className="font-bold mb-2">REGRAS PRF QBDRJ</h2>
+            <ul className="text-sm space-y-1">
+              {rules.map((r, i) => (
+                <li key={i}>• {r}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* DOCTRINE */}
+        {page === "doctrine" && (
+          <div className="md:col-span-3 border border-green-500/30 p-4">
+            <h2 className="font-bold mb-2">DOUTRINA OPERACIONAL</h2>
+            <ul className="text-sm space-y-1">
+              {doctrine.map((d, i) => (
+                <li key={i}>• {d}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* OPS */}
+        {page === "ops" && (
+          <div className="md:col-span-3 border border-green-500/30 p-4">
+            <h2 className="font-bold mb-2">OPERAÇÕES ATIVAS</h2>
+            <p className="text-sm">Sistema em simulação contínua...</p>
+          </div>
+        )}
+
+      </main>
+
+      {/* FOOTER */}
+      <footer className="text-center text-xs text-green-700 p-4 border-t border-green-500/20">
+        PRF QBDRJ FULL COMMAND SYSTEM v4
+      </footer>
+
+      {/* SCANLINE */}
+      <div className="pointer-events-none fixed inset-0 opacity-10 bg-[linear-gradient(to_bottom,transparent_50%,black_50%)] bg-[length:100%_4px]" />
     </div>
   );
 }
