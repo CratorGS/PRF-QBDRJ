@@ -13,12 +13,19 @@ const ranks = [
   "Comando Geral",
 ];
 
+type Profile = {
+  name: string;
+  rank: string;
+  xp: number;
+  missions: number;
+};
+
 export default function PRFMilitaryCore() {
   const [page, setPage] = useState("dashboard");
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState<Profile>({
     name: "Operador PRF",
     rank: "Recruta",
     xp: 0,
@@ -30,18 +37,22 @@ export default function PRFMilitaryCore() {
     "QTH — Central operacional ativa",
   ]);
 
-  // 🔥 CARREGAR LOCALSTORAGE (CLIENT ONLY)
+  // LOAD LOCALSTORAGE
   useEffect(() => {
     const saved = localStorage.getItem("prf_military");
-    if (saved) setProfile(JSON.parse(saved));
+    if (saved) {
+      try {
+        setProfile(JSON.parse(saved));
+      } catch {}
+    }
   }, []);
 
-  // 💾 SALVAR
+  // SAVE LOCALSTORAGE
   useEffect(() => {
     localStorage.setItem("prf_military", JSON.stringify(profile));
   }, [profile]);
 
-  // 🎧 AUDIO
+  // AUDIO
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = 0.2;
@@ -49,7 +60,7 @@ export default function PRFMilitaryCore() {
     }
   }, []);
 
-  // 📡 RADIO
+  // RADIO SYSTEM
   useEffect(() => {
     const interval = setInterval(() => {
       const msgs = [
@@ -72,9 +83,9 @@ export default function PRFMilitaryCore() {
     let xp = profile.xp + 25;
     let idx = ranks.indexOf(profile.rank);
 
-    if (xp >= 100 && idx < ranks.length - 1) {
+    if (xp >= 100) {
       xp = 0;
-      idx++;
+      idx = Math.min(idx + 1, ranks.length - 1);
     }
 
     setProfile({
@@ -88,9 +99,10 @@ export default function PRFMilitaryCore() {
   return (
     <div className="min-h-screen text-white bg-black overflow-hidden relative">
 
-      {/* VIDEO */}
+      {/* BACKGROUND VIDEO */}
       <div className="fixed inset-0 z-0">
         <iframe
+          title="background-video"
           className="w-full h-full scale-125 opacity-40 pointer-events-none"
           src="https://www.youtube.com/embed/-He5xYWa8kY?autoplay=1&mute=1&controls=0&loop=1&playlist=-He5xYWa8kY"
         />
@@ -111,17 +123,15 @@ export default function PRFMilitaryCore() {
           </h1>
 
           <div className="flex gap-2">
-            {["dashboard", "academy", "missions", "radio", "profile"].map(
-              (p) => (
-                <button
-                  key={p}
-                  onClick={() => setPage(p)}
-                  className="px-3 py-1 text-xs border border-green-500/30"
-                >
-                  {p.toUpperCase()}
-                </button>
-              )
-            )}
+            {["dashboard", "academy", "missions", "radio", "profile"].map((p) => (
+              <button
+                key={p}
+                onClick={() => setPage(p)}
+                className="px-3 py-1 text-xs border border-green-500/30"
+              >
+                {p.toUpperCase()}
+              </button>
+            ))}
           </div>
         </div>
       </div>
@@ -147,7 +157,10 @@ export default function PRFMilitaryCore() {
                 <div className="p-6 border border-green-500/30 bg-black/60 rounded-xl">
                   <p>XP</p>
                   <h3>{profile.xp}/100</h3>
-                  <button onClick={addXP} className="mt-4 bg-green-500 text-black px-3 py-1">
+                  <button
+                    onClick={addXP}
+                    className="mt-4 bg-green-500 text-black px-3 py-1"
+                  >
                     SIMULAR OPERAÇÃO
                   </button>
                 </div>
