@@ -7,7 +7,7 @@ import {
   Car, Target, Lock, Skull, Siren, Activity, Satellite, 
   Fingerprint, MapPin, CheckCircle2, Send, Megaphone, Cpu, 
   ExternalLink, MessageSquare, ShieldAlert, Crosshair, 
-  Mic2, Volume2, Info, List
+  Mic2, Volume2, Info, List, Wrench // 'Wrench' adicionado para substituir o erro 'Tool'
 } from "lucide-react";
 
 // --- BANCO DE DATOS DO ALUNO PRF ---
@@ -154,7 +154,8 @@ export default function PRFOmegaAlpha() {
                          <p className="text-[10px] text-zinc-500 font-bold uppercase mt-2">Hierarquia e disciplina acima de tudo. Respeite seus superiores.</p>
                       </div>
                       <div className="bg-white/5 p-8 rounded-[40px] border border-white/10 text-center">
-                         <ShieldCheck className="text-green-500 mx-auto mb-4" />
+                         {/* CORREÇÃO: 'ShieldCheck' alterado para 'Shield' para evitar erro de build */}
+                         <Shield className="text-green-500 mx-auto mb-4" />
                          <h4 className="font-black uppercase italic">Justiça</h4>
                          <p className="text-[10px] text-zinc-500 font-bold uppercase mt-2">Aplique a lei com imparcialidade. Verifique a calculadora penal.</p>
                       </div>
