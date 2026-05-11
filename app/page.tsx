@@ -1,286 +1,315 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Shield, Terminal, Lock, Gavel, Map, ClipboardList, Target, History, Award, 
-  Search, Users, Skull, AlertTriangle, Activity, BarChart, Crosshair, Siren,
-  Car, Sword, Radio, MessageSquare, Zap, FileText, Eye, Flame, ChevronRight,
-  Info, Bell, Satellite, Database, HardDrive, Wrench, MapPin, Fingerprint, 
-  Volume2, VolumeX, Cpu, Navigation, Copy, Scale
+  Shield, Radio, BookOpen, GraduationCap, Menu, Award, Scale, 
+  Car, Target, Lock, Skull, Siren, Activity, Satellite, 
+  Fingerprint, MapPin, CheckCircle2, Send, Megaphone, Cpu, 
+  ExternalLink, MessageSquare, ShieldAlert, Crosshair, 
+  Mic2, Volume2, Info, List
 } from "lucide-react";
 
-// --- ENGINE DE ÁUDIO ---
-const useAudio = () => {
-  const [muted, setMuted] = useState(false);
-  const play = (freq = 440, type = "sine", duration = 0.1) => {
-    if (muted || typeof window === "undefined") return;
-    try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = type as OscillatorType;
-      osc.frequency.setValueAtTime(freq, ctx.currentTime);
-      gain.gain.setValueAtTime(0.02, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + duration);
-    } catch (e) {}
-  };
-  return { play, muted, setMuted };
-};
-
-// --- BASE DE DADOS COMPLETA ---
+// --- BANCO DE DATOS DO ALUNO PRF ---
 const DATA = {
+  links: { prf: "https://discord.gg/H6kdsd5yRu", cidade: "https://discord.gg/XjBF8qrvJw" },
+  
+  // DICIONÁRIO DE RÁDIO APELADO PARA OS ALUNOS
+  protocolos: {
+    codigoQ: [
+      { q: "QAP", m: "Na Escuta / Atento", ex: "Agente pronto para receber mensagens." },
+      { q: "QRV", m: "À Disposição", ex: "Pronto para qualquer missão ou ordem." },
+      { q: "QTH", m: "Localização", ex: "Local exato onde a unidade se encontra." },
+      { q: "QSL", m: "Entendido / Confirmado", ex: "Mensagem recebida e compreendida." },
+      { q: "QRF", m: "Reforço", ex: "Solicitação de apoio para ocorrência." },
+      { q: "QRR", m: "Apoio Médico", ex: "Solicitação de SAMU / Paramédicos." },
+      { q: "QTI", m: "A Caminho", ex: "Unidade se deslocando para o local." },
+      { q: "TKS", m: "Obrigado", ex: "Agradecimento após comunicação." },
+      { q: "QRU", m: "Ocorrência / Novidade", ex: "Verificar se há algo novo no rádio." },
+      { q: "QRA", m: "Nome / Identidade", ex: "Nome do Agente ou do Civil." },
+    ],
+    codigosDeStatus: [
+      { c: "10-8", m: "Em Serviço (Disponível)", d: "Entrou em patrulha agora." },
+      { c: "10-7", m: "Fora de Serviço (QRL)", d: "Saiu para intervalo ou folga." },
+      { c: "10-20", m: "Localização Exata", d: "Mesmo que QTH." },
+      { c: "10-31", m: "Crime em Andamento", d: "Flagrante ocorrendo agora." },
+      { c: "10-33", m: "EMERGÊNCIA GERAL", d: "Oficial em perigo, silêncio no rádio!" },
+    ],
+    alfabeto: [
+      "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Golf", "Hotel", "India", "Juliet", "Kilo", "Lima", "Mike"
+    ]
+  },
+
   hierarquia: [
-    { c: "Diretor-Geral", d: "Comando Supremo.", p: 100, cl: "text-yellow-500" },
-    { c: "Superintendente", d: "Comandante Regional RJ.", p: 90, cl: "text-blue-500" },
-    { c: "Inspetor-Chefe", d: "Logística e Corregedoria.", p: 80, cl: "text-zinc-200" },
-    { c: "Agente Elite GRR", d: "Operações Especiais.", p: 70, cl: "text-red-500" },
-    { c: "Policial Rodoviário", d: "Agente Operacional.", p: 50, cl: "text-green-500" },
-    { c: "Recruta", d: "Em treinamento.", p: 20, cl: "text-zinc-600" },
+    { cat: "AUTO COMANDO", ranks: ["Diretor Geral", "Comando Geral", "Sub-Comando Geral"], color: "text-yellow-500" },
+    { cat: "COMANDANTES", ranks: ["Comando GRR", "Comando NOE", "Comando GOC", "Comando GMR", "Comando GPT", "Comando NOPI", "Comando COI", "Comando GFT", "Comando GDC"], color: "text-orange-500" },
+    { cat: "SUPERVISORES", ranks: ["Coordenador Operacional", "Chefe de Equipe", "Sub-Chefe de Equipe"], color: "text-blue-400" },
+    { cat: "INTERMEDIÁRIOS", ranks: ["Inspetor Chefe", "Inspetor", "Agente Especial"], color: "text-green-400" },
+    { cat: "POLICIAIS / AGENTES", ranks: ["Agente 1ª Classe", "Agente 2ª Classe", "Agente PRF", "Aluno / Recruta"], color: "text-zinc-400" }
   ],
-  codigos: [
-    { q: "QAP", m: "Na escuta", t: "Mantenha o rádio livre." },
-    { q: "QRF", m: "Reforço Imediato", t: "Prioridade 1. Risco de vida." },
-    { q: "QTH", m: "Localização", t: "Informe sua coordenada." },
-    { q: "QTI", m: "Deslocamento", t: "Unidade a caminho." },
-    { q: "QSL", m: "Entendido", t: "Mensagem recebida." },
-    { q: "TKS", m: "Obrigado", t: "Agradecimento tático." },
-  ],
-  penal: [
-    { art: "Art. 12", n: "Posse de Arma", p: "60 meses", m: "R$ 50k" },
-    { art: "Art. 33", n: "Tráfico", p: "120 meses", m: "R$ 150k" },
-    { art: "Art. 157", n: "Assalto", p: "80 meses", m: "R$ 40k" },
-    { art: "Art. 331", n: "Desacato", p: "30 meses", m: "R$ 10k" },
-  ],
-  arsenal: [
-    { n: "FAL 7.62", cat: "Fuzil", d: "Poder de parada extremo." },
-    { n: "M4A1 5.56", cat: "Fuzil", d: "Precisão em combate urbano." },
-    { n: "Glock 17", cat: "Pistola", d: "Secundária padrão." },
-  ],
-  viaturas: [
-    { m: "Trailblazer", f: "Blindagem Nível III." },
-    { m: "Dodge Charger", f: "Intercepção de alta velocidade." },
-    { m: "Helicóptero", f: "Suporte aéreo e vigilância." },
+  penas: [
+    { crime: "Desobediência", multa: 5000, meses: 0, desc: "Não acatar ordens." },
+    { crime: "Desacato", multa: 10000, meses: 20, desc: "Desrespeito ao Agente." },
+    { crime: "Fuga / Evasão", multa: 15000, meses: 30, desc: "Fugir da abordagem." },
+    { crime: "Porte Ilegal", multa: 40000, meses: 60, desc: "Arma sem registro." },
+    { crime: "Tráfico de Drogas", multa: 90000, meses: 100, desc: "Posse de entorpecentes." },
+    { crime: "Homicídio", multa: 150000, meses: 150, desc: "Atentar contra a vida." },
   ]
 };
 
-const navItems = [
-  { id: "DASHBOARD", icon: Activity },
-  { id: "HIERARQUIA", icon: Award },
-  { id: "CODIGOS", icon: MessageSquare },
-  { id: "PENAL", icon: Scale },
-  { id: "ARSENAL", icon: Skull },
-  { id: "VIATURAS", icon: Car },
-  { id: "REGISTRO", icon: FileText },
-  { id: "SISTEMAS", icon: Cpu },
-];
+export default function PRFOmegaAlpha() {
+  const [page, setPage] = useState("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [alertMode, setAlertMode] = useState(false);
+  const [calcPena, setCalcPena] = useState(0);
+  const [calcMulta, setCalcMulta] = useState(0);
 
-export default function PRFUltraCommand() {
-  const { play, muted, setMuted } = useAudio();
-  const [page, setPage] = useState("BOOT");
-  const [percent, setPercent] = useState(0);
-  const [search, setSearch] = useState("");
-  const [logs, setLogs] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (page === "BOOT") {
-      const timer = setInterval(() => {
-        setPercent(p => {
-          if (p >= 100) {
-            clearInterval(timer);
-            setTimeout(() => setPage("DASHBOARD"), 500);
-            return 100;
-          }
-          if (p % 20 === 0) play(200 + p * 5, "square", 0.05);
-          return p + 1;
-        });
-      }, 25);
-      return () => clearInterval(timer);
-    }
-  }, [page]);
-
-  useEffect(() => {
-    if (page !== "BOOT") {
-      const l = ["VTR-01 em patrulha", "DB-Sync OK", "Radar Ativo BR-101", "Criptografia G5 Ativa"];
-      const logTimer = setInterval(() => {
-        setLogs(prev => [l[Math.floor(Math.random() * l.length)], ...prev.slice(0, 4)]);
-      }, 3000);
-      return () => clearInterval(logTimer);
-    }
-  }, [page]);
-
-  const navTo = (p: string) => {
-    play(800, "sine", 0.05);
-    setPage(p);
+  const handleCalc = (p: number, m: number, checked: boolean) => {
+    setCalcPena(prev => checked ? prev + p : prev - p);
+    setCalcMulta(prev => checked ? prev + m : prev - m);
   };
 
-  if (page === "BOOT") {
-    return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center font-mono">
-        <motion.div animate={{ scale: [1, 1.1, 1], opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 2 }}>
-          <Shield size={100} className="text-yellow-500 mb-8 drop-shadow-[0_0_20px_#EAB308]" />
-        </motion.div>
-        <div className="w-64 h-1 bg-zinc-900 rounded-full overflow-hidden mb-4 border border-white/10">
-          <motion.div className="h-full bg-yellow-500 shadow-[0_0_10px_#EAB308]" style={{ width: `${percent}%` }} />
-        </div>
-        <p className="text-[10px] text-yellow-500 tracking-[0.5em] uppercase">Acessando Nucleo Aegis: {percent}%</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-[#020204] text-zinc-300 font-sans selection:bg-yellow-500 selection:text-black overflow-hidden">
+    <div className={`min-h-screen transition-colors duration-500 ${alertMode ? 'bg-[#2a0505]' : 'bg-[#020308]'} text-slate-100 font-sans`}>
       
-      {/* EFEITO DE SCANLINE */}
-      <div className="fixed inset-0 pointer-events-none z-[999] opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,2px_100%]" />
+      {/* EFEITOS HUD */}
+      <div className="fixed inset-0 pointer-events-none z-[999] opacity-[0.05] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,2px_100%]" />
 
       {/* HEADER */}
-      <header className="h-24 bg-black/80 backdrop-blur-xl border-b border-yellow-500/20 flex items-center justify-between px-10 fixed top-0 w-full z-[500]">
-        <div className="flex items-center gap-6 cursor-pointer" onClick={() => navTo("DASHBOARD")}>
-          <div className="p-3 bg-yellow-500 rounded-2xl shadow-[0_0_15px_rgba(234,179,8,0.4)]">
-            <Shield className="text-black" size={28} />
-          </div>
+      <header className={`fixed top-0 w-full h-24 ${alertMode ? 'bg-red-900/90' : 'bg-black/90'} border-b-2 ${alertMode ? 'border-red-500' : 'border-yellow-500/50'} backdrop-blur-xl z-[100] flex items-center justify-between px-10 transition-all`}>
+        <div className="flex items-center gap-6 cursor-pointer" onClick={() => setPage("dashboard")}>
+          <motion.div animate={alertMode ? { scale: [1, 1.1, 1] } : {}} transition={{ repeat: Infinity }} className={`${alertMode ? 'bg-red-600' : 'bg-yellow-500'} p-3 rounded-2xl`}>
+            <Shield className="text-black w-8 h-8" />
+          </motion.div>
           <div>
-            <h1 className="text-2xl font-black italic text-white tracking-tighter uppercase leading-none">PRF <span className="text-yellow-500">Quebrada RJ</span></h1>
-            <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mt-1">Status: Operacional G5</p>
+            <h1 className="font-black text-2xl tracking-tighter italic uppercase">PRF <span className={alertMode ? "text-white" : "text-yellow-500"}>QBDRJ</span></h1>
+            <p className="text-[8px] text-zinc-500 font-black tracking-[0.5em]">CENTRAL DE INSTRUÇÃO E OPERAÇÕES</p>
           </div>
         </div>
-        <div className="flex items-center gap-6">
-           <button onClick={() => setMuted(!muted)} className="p-3 bg-white/5 rounded-xl border border-white/5">
-              {muted ? <VolumeX size={18} /> : <Volume2 size={18} className="text-yellow-500" />}
+
+        <div className="flex items-center gap-4">
+           <button onClick={() => setAlertMode(!alertMode)} className={`px-6 py-2 rounded-xl text-[10px] font-black border transition-all ${alertMode ? 'bg-white text-red-600' : 'bg-red-600/10 border-red-600 text-red-500 hover:bg-red-600 hover:text-white'}`}>
+             {alertMode ? "CÓDIGO 3 EM ANDAMENTO" : "ATIVAR CÓDIGO 3"}
            </button>
-           <div className="text-right border-l border-white/10 pl-6">
-              <p className="text-2xl font-mono font-black text-yellow-500">{new Date().toLocaleTimeString('pt-BR')}</p>
-              <p className="text-[9px] text-zinc-600 font-bold uppercase">Sincronizado</p>
-           </div>
+           <div className="h-10 w-[1px] bg-white/10 mx-2" />
+           <a href={DATA.links.prf} target="_blank" className="bg-[#5865F2] p-2 rounded-lg hover:scale-110 transition-all"><MessageSquare size={20}/></a>
         </div>
       </header>
 
-      {/* MAIN */}
-      <main className="pt-32 px-10 pb-10 flex gap-8 h-screen">
+      <div className="flex pt-24 h-screen overflow-hidden">
         
         {/* SIDEBAR */}
-        <nav className="w-72 flex flex-col gap-2 overflow-y-auto custom-scrollbar pr-2">
-          <div className="relative mb-4">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={14} />
-            <input 
-              value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="PESQUISAR..."
-              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 text-[9px] font-black outline-none focus:border-yellow-500/50 transition-all"
-            />
+        <motion.aside animate={{ width: sidebarOpen ? 280 : 90 }} className="bg-black/95 border-r border-white/5 z-[90] flex flex-col transition-all">
+          <div className="p-6 flex-1 space-y-2 overflow-y-auto custom-scrollbar">
+            {[
+              { id: "dashboard", label: "Dashboard", icon: <Cpu size={18}/> },
+              { id: "codigos", label: "Protocolos / Código Q", icon: <Radio size={18}/> },
+              { id: "hierarquia", label: "Hierarquia", icon: <Award size={18}/> },
+              { id: "penal", label: "Calculadora", icon: <Scale size={18}/> },
+              { id: "ouvidoria", label: "Ouvidoria", icon: <Megaphone size={18}/> },
+              { id: "miranda", label: "Miranda", icon: <Lock size={18}/> },
+            ].map((s) => (
+              <button
+                key={s.id}
+                onClick={() => setPage(s.id)}
+                className={`w-full flex items-center gap-5 px-5 py-4 rounded-xl transition-all ${
+                  page === s.id ? (alertMode ? 'bg-red-600 text-white' : 'bg-yellow-500 text-black font-black') : 'text-zinc-500 hover:bg-white/5 hover:text-white'
+                }`}
+              >
+                {s.icon}
+                {sidebarOpen && <span className="uppercase text-[10px] font-black tracking-widest">{s.label}</span>}
+              </button>
+            ))}
           </div>
-          {navItems.filter(i => i.id.includes(search.toUpperCase())).map((item) => (
-            <button
-              key={item.id}
-              onClick={() => navTo(item.id)}
-              className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
-                page === item.id ? 'bg-yellow-500 border-yellow-400 text-black shadow-lg shadow-yellow-500/10' : 'bg-white/5 border-white/5 text-zinc-500 hover:text-white'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <item.icon size={16} />
-                <span className="text-[10px] font-black uppercase tracking-widest">{item.id}</span>
-              </div>
-              <ChevronRight size={12} className={page === item.id ? "opacity-100" : "opacity-0"} />
-            </button>
-          ))}
-        </nav>
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-8 border-t border-white/5 text-zinc-700 hover:text-yellow-500 flex justify-center"><Menu size={20} /></button>
+        </motion.aside>
 
-        {/* CONTENT AREA */}
-        <section className="flex-1 bg-zinc-950/50 border border-white/5 rounded-[40px] relative overflow-hidden flex flex-col">
-          <div className="p-10 overflow-y-auto custom-scrollbar h-full">
-            <AnimatePresence mode="wait">
-              <motion.div key={page} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-10">
-                
-                {page === "DASHBOARD" && (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div className="space-y-6">
-                       <h2 className="text-5xl font-black uppercase italic leading-none text-white">Radar de <span className="text-yellow-500">Area</span></h2>
-                       <div className="aspect-square bg-black border border-yellow-500/10 rounded-full relative overflow-hidden flex items-center justify-center">
-                          <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 4, ease: "linear" }} className="absolute inset-0 bg-[conic-gradient(from_0deg,transparent_0deg,rgba(234,179,8,0.1)_360deg)]" />
-                          <div className="w-2 h-2 bg-yellow-500 rounded-full animate-ping" />
-                          <p className="absolute bottom-10 text-[9px] font-mono text-yellow-500 uppercase">GPS Ativo: BR-101 / KM-22</p>
-                       </div>
-                    </div>
-                    <div className="grid grid-cols-1 gap-4">
-                       {[{l:"VTRs", v:"12", i:Car}, {l:"EFETIVO", v:"34", i:Users}, {l:"ALERTAS", v:"03", i:Bell}].map((s,i)=>(
-                         <div key={i} className="bg-white/5 p-6 rounded-3xl border border-white/5 flex items-center justify-between">
-                            <div><p className="text-[9px] font-black text-zinc-500 uppercase">{s.l}</p><h4 className="text-3xl font-black text-white">{s.v}</h4></div>
-                            <s.i className="text-yellow-500 opacity-20" size={32} />
-                         </div>
-                       ))}
-                       <div className="bg-black p-6 rounded-3xl border border-white/5 font-mono text-[9px] text-zinc-500 h-32 overflow-hidden">
-                          <p className="text-yellow-500/50 mb-2 font-black tracking-widest uppercase tracking-tighter">System Intelligence Feed</p>
-                          {logs.map((log, i) => <p key={i}>[{new Date().toLocaleTimeString()}] {log}</p>)}
-                       </div>
-                    </div>
-                  </div>
-                )}
-
-                {page === "HIERARQUIA" && (
-                  <div className="space-y-3">
-                    {DATA.hierarquia.map((h, i) => (
-                      <div key={i} className="bg-white/5 border border-white/5 p-6 rounded-2xl flex items-center gap-6">
-                        <div className={`text-3xl font-black ${h.cl} w-16`}>{h.p}%</div>
-                        <div><h4 className="text-xl font-black uppercase text-white">{h.c}</h4><p className="text-[10px] text-zinc-500 uppercase">{h.d}</p></div>
+        {/* ÁREA PRINCIPAL */}
+        <main className="flex-1 overflow-y-auto p-12 custom-scrollbar">
+          <AnimatePresence mode="wait">
+            <motion.div key={page} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="max-w-6xl mx-auto">
+              
+              {/* DASHBOARD */}
+              {page === "dashboard" && (
+                <div className="space-y-8">
+                   <div className={`p-16 rounded-[60px] relative overflow-hidden ${alertMode ? 'bg-red-600 text-white' : 'bg-yellow-500 text-black'}`}>
+                      <h2 className="text-8xl font-black italic uppercase leading-none tracking-tighter">PRF-QBDRJ</h2>
+                      <p className="mt-6 text-xl font-bold max-w-xl uppercase italic opacity-80 leading-tight">
+                         Bem-vindo à Central de Instrução. Aluno, aqui você encontrará tudo o que precisa para honrar a farda. Estude os códigos Q e a hierarquia.
+                      </p>
+                      <div className="flex gap-4 mt-10">
+                        <a href={DATA.links.prf} target="_blank" className="bg-black text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase">Discord PRF</a>
+                        <a href={DATA.links.cidade} target="_blank" className="bg-white/20 border border-black/10 px-8 py-4 rounded-2xl font-black text-[10px] uppercase">Discord Cidade</a>
                       </div>
-                    ))}
-                  </div>
-                )}
+                   </div>
+                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="bg-white/5 p-8 rounded-[40px] border border-white/10 text-center">
+                         <Mic2 className="text-yellow-500 mx-auto mb-4" />
+                         <h4 className="font-black uppercase italic">Comunicação</h4>
+                         <p className="text-[10px] text-zinc-500 font-bold uppercase mt-2">Mantenha o rádio limpo. Use códigos Q para agilizar a resposta.</p>
+                      </div>
+                      <div className="bg-white/5 p-8 rounded-[40px] border border-white/10 text-center">
+                         <Target className="text-red-500 mx-auto mb-4" />
+                         <h4 className="font-black uppercase italic">Conduta</h4>
+                         <p className="text-[10px] text-zinc-500 font-bold uppercase mt-2">Hierarquia e disciplina acima de tudo. Respeite seus superiores.</p>
+                      </div>
+                      <div className="bg-white/5 p-8 rounded-[40px] border border-white/10 text-center">
+                         <ShieldCheck className="text-green-500 mx-auto mb-4" />
+                         <h4 className="font-black uppercase italic">Justiça</h4>
+                         <p className="text-[10px] text-zinc-500 font-bold uppercase mt-2">Aplique a lei com imparcialidade. Verifique a calculadora penal.</p>
+                      </div>
+                   </div>
+                </div>
+              )}
 
-                {page === "PENAL" && (
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {DATA.penal.map((p, i) => (
-                        <div key={i} className="bg-black p-6 rounded-3xl border border-white/5 relative overflow-hidden group hover:border-red-500/30 transition-all">
-                           <div className="text-yellow-500 text-[9px] font-black">{p.art}</div>
-                           <h4 className="text-xl font-black text-white uppercase my-2">{p.n}</h4>
-                           <div className="flex justify-between pt-4 border-t border-white/5 text-[9px] font-black uppercase">
-                              <span className="text-red-500">Pena: {p.p}</span>
-                              <span className="text-green-500">Multa: {p.m}</span>
+              {/* PROTOCOLOS DE RÁDIO (APELADO) */}
+              {page === "codigos" && (
+                <div className="space-y-12">
+                   <div className="text-center">
+                      <h2 className="text-5xl font-black italic uppercase text-yellow-500">Manual de Comunicação</h2>
+                      <p className="text-zinc-500 text-xs font-bold uppercase mt-2 tracking-widest">O domínio do rádio separa o aluno do profissional.</p>
+                   </div>
+
+                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                      {/* CÓDIGO Q */}
+                      <div className="bg-white/5 border border-white/10 rounded-[50px] p-10">
+                         <h3 className="text-2xl font-black italic mb-8 text-yellow-500 flex items-center gap-4"><Radio/> CÓDIGOS Q PRINCIPAIS</h3>
+                         <div className="space-y-4">
+                            {DATA.protocolos.codigoQ.map((item, i) => (
+                              <div key={i} className="bg-black/60 p-5 rounded-2xl border border-white/5 hover:border-yellow-500 transition-all group">
+                                 <div className="flex justify-between items-center mb-1">
+                                    <span className="text-2xl font-black text-white group-hover:text-yellow-500">{item.q}</span>
+                                    <span className="text-[10px] font-black text-zinc-500 uppercase">{item.m}</span>
+                                 </div>
+                                 <p className="text-[9px] text-zinc-600 font-bold uppercase italic">{item.ex}</p>
+                              </div>
+                            ))}
+                         </div>
+                      </div>
+
+                      <div className="space-y-10">
+                         {/* CÓDIGOS DE STATUS */}
+                         <div className="bg-white/5 border border-white/10 rounded-[50px] p-10">
+                            <h3 className="text-2xl font-black italic mb-8 text-blue-500 flex items-center gap-4"><List/> STATUS DE SERVIÇO</h3>
+                            <div className="grid grid-cols-1 gap-4">
+                               {DATA.protocolos.codigosDeStatus.map((item, i) => (
+                                 <div key={i} className="flex justify-between items-center bg-black/40 p-4 rounded-xl border border-white/5">
+                                    <div><span className="font-black text-blue-500 mr-4">{item.c}</span><span className="text-xs font-black uppercase text-white">{item.m}</span></div>
+                                    <span className="text-[9px] text-zinc-600 font-bold uppercase">{item.d}</span>
+                                 </div>
+                               ))}
+                            </div>
+                         </div>
+
+                         {/* ALFABETO FONÉTICO */}
+                         <div className="bg-yellow-500 p-10 rounded-[50px] text-black">
+                            <h3 className="text-2xl font-black italic mb-6 flex items-center gap-4"><Volume2/> ALFABETO FONÉTICO</h3>
+                            <div className="flex flex-wrap gap-2">
+                               {DATA.protocolos.alfabeto.map((word, i) => (
+                                 <span key={i} className="bg-black text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase">{word}</span>
+                               ))}
+                               <span className="text-[10px] font-bold italic opacity-60">...entre outros.</span>
+                            </div>
+                            <p className="mt-6 text-[10px] font-bold uppercase leading-tight opacity-80">
+                               ALUNO: Use o alfabeto para informar placas. <br/>Ex: "Veículo placa Alpha-Bravo-01"
+                            </p>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+              )}
+
+              {/* HIERARQUIA */}
+              {page === "hierarquia" && (
+                <div className="space-y-10">
+                   <h2 className="text-5xl font-black italic uppercase text-yellow-500 text-center">Cadeia de Comando</h2>
+                   <div className="grid grid-cols-1 gap-6">
+                      {DATA.hierarquia.map((cat, i) => (
+                        <div key={i} className="bg-white/5 border border-white/10 rounded-[40px] p-8">
+                           <h3 className={`text-xl font-black italic mb-6 uppercase ${cat.color}`}>{cat.cat}</h3>
+                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                              {cat.ranks.map((rank, idx) => (
+                                <div key={idx} className="bg-black/50 p-4 rounded-xl border border-white/5 text-center">
+                                   <p className="font-black uppercase text-[10px] tracking-widest">{rank}</p>
+                                </div>
+                              ))}
                            </div>
                         </div>
                       ))}
                    </div>
-                )}
+                </div>
+              )}
 
-                {["ARSENAL", "VIATURAS", "CODIGOS"].includes(page) && (
-                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {(DATA[page.toLowerCase() as keyof typeof DATA] as any[]).map((item, i) => (
-                        <div key={i} className="bg-white/5 p-6 rounded-3xl border border-white/5">
-                           <h4 className="text-lg font-black text-yellow-500 uppercase mb-2">{item.n || item.m || item.q}</h4>
-                           <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest">{item.d || item.f || item.m}</p>
-                        </div>
+              {/* CALCULADORA PENAL */}
+              {page === "penal" && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                   <div className="lg:col-span-2 space-y-4">
+                      <h2 className="text-4xl font-black italic uppercase text-yellow-500 mb-8 underline">Calculadora de Pena</h2>
+                      {DATA.penas.map((l, i) => (
+                        <label key={i} className="flex items-center justify-between p-8 bg-black/60 border border-white/5 rounded-[40px] hover:bg-yellow-500/5 cursor-pointer transition-all group">
+                           <div className="flex items-center gap-8">
+                              <input type="checkbox" className="w-8 h-8 accent-yellow-500" onChange={(e) => handleCalc(l.meses, l.multa, e.target.checked)} />
+                              <div><p className="font-black uppercase text-xl group-hover:text-yellow-500">{l.crime}</p><p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">{l.desc}</p></div>
+                           </div>
+                           <div className="text-right font-black">
+                              <p className="text-red-500 text-lg">{l.meses} M</p>
+                              <p className="text-green-500 text-xs">R$ {l.multa.toLocaleString()}</p>
+                           </div>
+                        </label>
                       ))}
                    </div>
-                )}
-
-                {page === "REGISTRO" && (
-                   <div className="bg-white/5 p-10 rounded-[40px] border border-white/10 space-y-6">
-                      <h2 className="text-3xl font-black italic text-yellow-500 uppercase">Boletim Digital</h2>
-                      <div className="grid grid-cols-2 gap-4">
-                         <input className="bg-black border border-white/10 p-4 rounded-xl text-xs outline-none focus:border-yellow-500" placeholder="ID DO SUSPEITO" />
-                         <input className="bg-black border border-white/10 p-4 rounded-xl text-xs outline-none focus:border-yellow-500" placeholder="QTH (LOCAL)" />
-                         <textarea className="col-span-2 bg-black border border-white/10 p-4 rounded-xl text-xs h-32 outline-none focus:border-yellow-500" placeholder="RELATORIO DA OCORRENCIA..." />
+                   <div className={`p-12 rounded-[60px] text-black h-fit sticky top-32 text-center shadow-2xl transition-all ${alertMode ? 'bg-red-500' : 'bg-yellow-500'}`}>
+                      <h3 className="text-3xl font-black uppercase italic border-b-2 border-black/10 pb-6 mb-8">SENTENÇA</h3>
+                      <div className="space-y-8">
+                        <div><p className="text-[10px] font-black uppercase opacity-60">Pena de Prisão</p><h4 className="text-8xl font-black tracking-tighter leading-none">{calcPena}</h4><p className="text-xs font-black uppercase mt-1">Meses</p></div>
+                        <div className="bg-black/10 p-4 rounded-2xl"><p className="text-[10px] font-black uppercase opacity-60">Multas</p><h4 className="text-3xl font-black tracking-tighter">R$ {calcMulta.toLocaleString()}</h4></div>
                       </div>
-                      <button onClick={()=>play(300, "square", 0.3)} className="w-full bg-yellow-500 text-black font-black py-4 rounded-xl uppercase text-xs tracking-widest shadow-xl shadow-yellow-500/20">Enviar ao Comando</button>
+                      <button onClick={() => window.location.reload()} className="w-full bg-black text-white py-6 rounded-[30px] font-black uppercase text-[10px] mt-10 hover:scale-105 transition-all">Limpar</button>
                    </div>
-                )}
+                </div>
+              )}
 
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </section>
-      </main>
+              {/* LEI DE MIRANDA */}
+              {page === "miranda" && (
+                <div className="h-[60vh] flex flex-col items-center justify-center border-8 border-red-600/20 rounded-[80px] bg-red-600/5 p-12 text-center shadow-2xl">
+                   <Lock size={100} className="text-red-600 mb-8 animate-pulse" />
+                   <h2 className="text-7xl font-black italic uppercase text-red-600 mb-10 leading-none text-white">Voz de <br/><span className="text-red-600">Miranda</span></h2>
+                   <div className="max-w-4xl p-10 bg-black rounded-[40px] border border-red-600/40">
+                      <p className="text-3xl font-black italic text-white leading-tight">
+                        "Você tem o direito de permanecer em silêncio. Tudo o que você disser pode e será usado contra você no tribunal. Você tem direito a um advogado; se não puder pagar por um, o estado providenciará um."
+                      </p>
+                   </div>
+                </div>
+              )}
 
-      <footer className="fixed bottom-0 w-full h-8 bg-yellow-500 flex items-center overflow-hidden">
-        <div className="flex gap-20 animate-marquee text-black font-black text-[9px] italic uppercase tracking-widest">
-           {[...Array(6)].map((_, i) => (
-             <div key={i} className="flex items-center gap-4 whitespace-nowrap">
-               <Siren size={12} /> ALERTA: OPERACAO NA LINHA VERMELHA - MANTENHA O QAP GERAL
+              {/* OUVIDORIA */}
+              {page === "ouvidoria" && (
+                <div className="max-w-2xl mx-auto space-y-12">
+                   <div className="text-center">
+                      <h2 className="text-5xl font-black italic uppercase text-yellow-500">Ouvidoria</h2>
+                      <p className="text-zinc-500 text-xs font-bold uppercase mt-4">Canal oficial para denúncias ou relatos.</p>
+                   </div>
+                   <div className="space-y-6">
+                      <input type="text" placeholder="ID (PASSAPORTE)" className="bg-white/5 border border-white/10 p-6 rounded-3xl outline-none focus:border-yellow-500 font-black uppercase text-xs w-full" />
+                      <textarea rows={6} placeholder="DESCREVA O RELATO..." className="bg-white/5 border border-white/10 p-6 rounded-3xl outline-none focus:border-yellow-500 font-black uppercase text-xs w-full" />
+                      <button className="w-full bg-yellow-500 text-black py-6 rounded-3xl font-black uppercase text-[10px] flex items-center justify-center gap-4 hover:scale-105 transition-all">
+                         <Send size={18}/> Enviar Relatório
+                      </button>
+                   </div>
+                </div>
+              )}
+
+            </motion.div>
+          </AnimatePresence>
+        </main>
+      </div>
+
+      {/* FOOTER TICKER */}
+      <footer className={`fixed bottom-0 w-full h-12 ${alertMode ? 'bg-red-600 animate-pulse' : 'bg-yellow-500'} z-[100] flex items-center overflow-hidden`}>
+        <div className="flex gap-20 animate-marquee whitespace-nowrap items-center text-black font-black text-[10px] italic tracking-widest uppercase">
+           {[...Array(10)].map((_, i) => (
+             <div key={i} className="flex items-center gap-6">
+               <Siren size={18} /> {alertMode ? "ALERTA CÓDIGO 3: PRIORIDADE TOTAL NO RÁDIO" : "POLÍCIA RODOVIÁRIA FEDERAL - QUEBRADA RJ - AS ESTRADAS SÃO NOSSO DOMÍNIO - QAP QRV"}
              </div>
            ))}
         </div>
@@ -289,8 +318,9 @@ export default function PRFUltraCommand() {
       <style jsx global>{`
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         .animate-marquee { animation: marquee 25s linear infinite; }
-        .custom-scrollbar::-webkit-scrollbar { width: 3px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #EAB308; border-radius: 10px; }
+        body { background-color: #020308; cursor: crosshair; }
       `}</style>
     </div>
   );
